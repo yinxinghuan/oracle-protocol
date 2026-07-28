@@ -1,128 +1,93 @@
-# 《神谕协议 / Oracle Protocol》技术文档
+# 《神谕协议 / Oracle Protocol》V2 技术文档
 
 ## 1. 技术栈
 
-- 框架：React 18 + TypeScript。
-- 构建：Vite 5，`base: './'`，`npm run build` 输出可部署的 `dist/`。
-- 样式：Less；界面、卡牌翻转、全息箔和粒子均由 DOM/CSS 完成。
-- 牌组动画：项目内的无依赖 TypeScript `BarajaDeck`，依据 Codrops Baraja
-  v1.0.0 的 MIT 源码机制重写，扇形几何与 DOM 控制器分离。
-- 音频：Web Audio API 运行时合成，不加载音频文件。
-- 玩家资料：复用本地 `@shared/runtime` 的 `callAigramAPI()`。
-- 图像：制作期通过 Aigram transit 绘图接口生成 1024×1024 PNG 源图，运行时
-  转为质量 86 的 WebP；浏览器内不等待生图。
+- React 18 + TypeScript，Vite 5 构建，`base: './'`，输出 `dist/`。
+- Less 负责响应式布局、圆环、聚焦、翻牌、分页过渡和粒子。
+- `computeBarajaOrbit()` 将 Codrops Baraja 的“显式卡序 → 每牌变换与层级”机制扩展为 360° 椭圆牌阵。
+- CSS Holographic Masks 改造层只用于当前特殊主卡，使用 `mix-blend-mode: color-dodge`。
+- Web Audio API 合成反馈音；所有创建与播放异常静默降级。
+- Aigram `callAigramAPI()` 获取玩家 `name` 与 `head_url` 资料；资料失败不阻塞。
+- 卡面与卡背为制作期通过 Aigram transit 绘图接口生成并编码的 WebP。
 
-第三方来源、固定版本、许可证与完整保留声明位于
-`public/THIRD_PARTY_NOTICES.txt`，构建后同样进入
-`dist/THIRD_PARTY_NOTICES.txt`。
+第三方来源与 MIT 声明在 `public/THIRD_PARTY_NOTICES.txt`，构建后同步进入 `dist/`。
 
 ## 2. 目录结构
 
 ```text
 oracle-protocol/
-├── _artifacts/                    # 绘图原图、被淘汰版本、生成日志与 QA 缩略图
-├── _production/
-│   ├── generate_card_art.py       # 串行调用 Aigram 绘图接口并记录 URL/提示词
-│   ├── encode_card_art.mjs        # 将审核通过的 PNG 批量压缩成运行时 WebP
-│   └── make_poster.mjs            # 给平台生成的叙事底图做栅格排版
+├── _artifacts/                         # 绘图原图、生成记录与审核材料
+├── _production/                        # 卡图生成、编码与海报制作脚本
+├── _qa/
+│   ├── capture-v2.mjs                  # V2 全流程双尺寸浏览器 QA
+│   └── ui/                             # platform-layout / external-guest 证据
 ├── doc/
-│   ├── requirements.md            # 玩法与产品要求
-│   ├── visual.md                  # 视觉系统与实机验收结论
-│   ├── screen-contract.md         # 屏幕、状态和响应式合同
-│   ├── feedback-matrix.md         # 事件反馈矩阵
-│   └── technical.md               # 本文档
+│   ├── requirements.md                 # V2 玩法蓝图
+│   ├── visual.md                       # 神谕圆环视觉规范
+│   ├── screen-contract.md              # 逐幕屏幕合同
+│   ├── feedback-matrix.md              # 输入与反馈时序
+│   └── technical.md                    # 本文档
 ├── public/
-│   ├── card-art/*.webp            # 12 张牌面、卡背与海报底图
-│   ├── poster.png                 # 1024×1024 正式封面
+│   ├── card-art/*.webp                 # 12 张牌面与卡背
+│   ├── poster.png
 │   └── THIRD_PARTY_NOTICES.txt
-├── src/
-│   ├── OracleProtocol/
-│   │   ├── components/            # SVG 图标与 AlterU 水印
-│   │   ├── data/cards.ts          # 12 张牌、正逆位牌义和反思问题
-│   │   ├── hooks/usePlayerName.ts # 玩家称呼与回退顺序
-│   │   ├── i18n/index.ts          # zh/en 文案
-│   │   ├── lib/                   # Baraja 控制器与纯布局函数
-│   │   ├── styles/                # 第三方机制适配后的牌组/全息基础样式
-│   │   ├── utils/audio.ts         # 合成音效
-│   │   ├── OracleProtocol.tsx     # 状态机、输入与全部屏幕
-│   │   └── OracleProtocol.less    # 视觉系统、响应式与动效
-│   ├── shared/runtime/            # 平台桥接运行时
-│   └── game-id.ts                 # 永久游戏 UUID
-├── index.html
-├── meta.json
-└── vite.config.ts
+└── src/
+    ├── game-id.ts                      # 永久游戏 UUID
+    └── OracleProtocol/
+        ├── OracleProtocol.tsx           # 状态机、圆环交互、单牌与分页阅读
+        ├── OracleProtocol.less          # 全部界面与动效
+        ├── data/cards.ts                # 传统牌义、正逆位与反思问题
+        ├── data/plain-readings.ts       # 面向普通玩家的白话解释与行动
+        ├── lib/baraja-layout.ts         # 扇形与圆环变换计算
+        ├── lib/baraja-deck.ts           # 可复用卡序控制器
+        ├── styles/                      # Baraja 基础与全息箔
+        ├── i18n/index.ts                # zh/en 界面文案
+        └── utils/audio.ts               # 非阻塞合成音
 ```
 
 ## 3. 核心模块
 
-### 状态与主流程
+### 状态机
 
-`OracleProtocol.tsx` 使用五态状态机：
-`intro → shuffling → choosing → reveal → reading`。`remaining` 保存未抽牌，
-`drawn` 保存牌与本局固定的正逆位，`revealedCount` 保证必须按过去、现在、
-未来逐张翻开。`locked` 覆盖洗牌、抽牌置顶和翻牌恢复窗口，防止快速重复输入。
+`OracleProtocol.tsx` 使用 `intro → shuffling → choosing → focus → reveal → meaning → reading` 七阶段状态机。每屏只渲染当前任务：
 
-洗牌使用 `crypto.getRandomValues` 驱动 Fisher–Yates；单张逆位概率为 35%。
-综合神谕不请求网络，由三张已抽牌的确定性牌义组合，因此资料接口或网络失败
-不会阻塞第一层反馈。
+- `choosing`：12/11/10 张牌沿圆环排布。
+- `focus`：候选牌保存正逆位，从圆环位置动画到中央；可撤销。
+- `reveal`：当前牌翻面，只呈现标题与白话结论。
+- `meaning`：显示 2–3 行解释和一条行动建议。
+- `reading`：`readingPage` 在 0–3 之间切换，分别显示过去、当下、下一步与今日提示。
 
-### 牌组与屏幕适配
+`actionLockRef` 在同一事件循环中同步阻止重复输入；所有关键解锁使用有上限的 `setTimeout`，不依赖 `animation.finished` 或 `transitionend`。
 
-`lib/baraja-layout.ts` 是纯函数：根据卡数、扇面角度、方向、位移和变换原点
-生成每张牌的姿态。`lib/baraja-deck.ts` 只负责真实 DOM 的动画、层级和置顶。
-390×844 使用 54° 扇面；320 宽或 640 高以下降低到 38°–44°，并缩小卡宽。
+### 圆环布局
 
-牌面固定为 2:3，使用 `object-fit: cover` 从方形生成图中取中央安全区。图片失败
-时显示几何版画占位，同时保留牌名、方向、关键词和全部解读。
+`computeBarajaOrbit(count, settings)` 按卡序计算角度、`translateX/Y`、朝向圆心的旋转和 z-index。主组件根据 `innerWidth / innerHeight` 选择 `103×126` 或 `138×178` 半径。CSS 变量将姿态交给每个卡牌按钮，保持可访问按钮语义。
 
-### 输入与无障碍
+### 白话解读
 
-开始、抽牌和翻牌使用 `onPointerDown`，避免移动端 mouse/touch 双触发；结果页
-的“再次连接”位于可滚动内容内，使用 `onClick`。扇面牌额外处理 Enter/Space，
-键盘 `1/2/3` 可选左、中、右候选。隐藏牌的无障碍名称只描述“扇面第 n 张”，
-不泄露真实牌号。所有功能图标是同一线性 SVG 系统，目标至少 44×44。
+`plain-readings.ts` 为 12 张牌的正逆位各提供：
 
-入口 `index.html` 包含 iOS 长按保护。`prefers-reduced-motion` 会将牌堆与翻牌
-过渡缩短或取消，并保留静态全息材质。
+- `headline`：一眼能懂的结论。
+- `message`：不超过 3 行的生活化解释。
+- `action`：今天可执行的一件小事。
 
-### 全息与音频
+经典牌义与反思问题仍保留在 `cards.ts`，只在分页阅读的“问问自己”区域使用。界面不再展示模型漂移、损失函数或版本迁移等技术黑话。
 
-`holographic-card-foil.css` 仅应用于 `holographic: true` 的“对齐”“开源之星”
-和“奇点”。它使用卡内伪元素的多层渐变、混合模式与 `background-position`
-动画，不复制原 Demo 图片或遮罩纹理。稀有牌翻开时触发 10 个棱镜细片和四音
-上行；普通牌为 6 个金箔细片和双音反馈。
+### 视觉、响应式与无障碍
 
-音频模块在首次用户操作后解锁 `AudioContext`。创建或播放失败会静默降级，
-不改变游戏状态。
+卡面固定 2:3；圆环和中央主卡使用响应式尺寸。390×844 与 320×568 有独立半径、主卡和排版规则。功能图标为同一套 SVG，按钮最小 44×44 px，圆环每张牌为真实按钮并有 `aria-label`。`prefers-reduced-motion` 下直接到达相同布局终态。
 
-### 多语言与玩家身份
+### 音频与平台
 
-所有界面文案通过 `i18n/index.ts` 的 `t()` 读取，支持 `zh/en`，语言选择保存在
-`game_locale`。玩家称呼顺序为：
-
-1. `?user_name=` 调试覆盖；
-2. AlterU 内调用
-   `/note/telegram/user/get/info/by/telegram_id?telegram_id=…`，优先读取
-   `data.name`，兼容 `data.user_name`；
-3. 平台外或接口失败使用 `AlterU`。
-
-本作的视觉主体是固定的原创大阿尔卡那插画，不读取示例人物照片，也不把头像
-仅装饰在 HUD；玩家身份通过名字进入仪式称呼和结果标题。
+`audio.ts` 首次操作后创建或恢复 `AudioContext`，每个节点创建都包在异常保护中。`usePlayerName.ts` 按调试覆盖、Aigram 当前玩家、平台外 `AlterU` 回退；资料请求与图片失败都不阻塞游戏。
 
 ## 4. 扩展点
 
-- 改牌义或新增牌：编辑 `src/OracleProtocol/data/cards.ts`；新增牌时同时添加
-  `public/card-art/<id>.webp`，并检查扇面在 320×568 的暴露点击区。
-- 改牌阵：编辑 `POSITIONS`、抽牌上限、`choicePrompt` 和结果三段映射；若超过
-  3 张，需要重新设计翻牌网格，不能只压缩卡宽。
-- 调整随机或正逆位概率：修改 `shuffledCards()` 与 `handleDraw()`。
-- 调视觉：优先改 `OracleProtocol.less` 顶部颜色变量和相应组件块；全息强度在
-  `.op-card-face` 的 `--hcf-opacity/--hcf-duration` 调整。
-- 换卡图：修改 `_production/generate_card_art.py` 的场景与工艺提示，串行生成后
-  做视觉审查，再压缩为同名 WebP。`generation-log.json` 必须保留请求 URL、
-  原始提示词和拒绝记录。
-- 加后端保存：在进入 `reading` 后持久化牌号、正逆位、协议 ID 与时间；恢复时
-  直接重建 `drawn`，不要重新随机。游戏 UUID
-  `6c0e2a8d-a814-4de8-bf4a-c61ac04fdf1e` 永久不变。
-- 换音效：编辑 `utils/audio.ts` 的频率、波形、包络；仍需保持首次操作后才创建
-  AudioContext。
+- 调整圆环半径、旋转或层级：`src/OracleProtocol/lib/baraja-layout.ts` 与 `OracleProtocol.tsx` 的 orbit settings。
+- 修改页面顺序或抽牌规则：`OracleProtocol.tsx` 的阶段处理函数。
+- 改白话解读与今日行动：`data/plain-readings.ts`。
+- 改经典牌义、反思问题或新增牌：`data/cards.ts`，并在 `public/card-art/` 添加图片。
+- 调整色彩、字号、主卡尺寸、全息强度和短屏布局：`OracleProtocol.less`。
+- 修改 zh/en 界面按钮：`i18n/index.ts`。
+- 新增声音：`utils/audio.ts`，保持异常不阻塞状态机。
+- 发布元数据：根目录 `meta.json`、`README.md`、`public/poster.png` 和 games 仓库条目。

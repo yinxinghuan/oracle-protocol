@@ -1,5 +1,12 @@
 export type Locale = 'zh' | 'en'
-export type GamePhase = 'intro' | 'shuffling' | 'choosing' | 'reveal' | 'reading'
+export type GamePhase =
+  | 'intro'
+  | 'shuffling'
+  | 'choosing'
+  | 'focus'
+  | 'reveal'
+  | 'meaning'
+  | 'reading'
 export type Position = 'past' | 'present' | 'future'
 
 export interface LocalizedText {

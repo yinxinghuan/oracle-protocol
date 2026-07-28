@@ -28,6 +28,21 @@ export interface BarajaPose {
   originY: number
 }
 
+export interface BarajaOrbitSettings {
+  radiusX: number
+  radiusY: number
+  startAngle: number
+  faceCenter: boolean
+}
+
+export interface BarajaOrbitPose {
+  translateX: number
+  translateY: number
+  rotation: number
+  angle: number
+  zIndex: number
+}
+
 export const DEFAULT_BARAJA_FAN: Readonly<BarajaFanSettings> = {
   speed: 500,
   easing: 'ease-out',
@@ -106,6 +121,37 @@ export function computeBarajaFan(
       rotation,
       originX: originForRank(settings.origin, rank, count, settings.direction),
       originY: settings.origin.y,
+    }
+  })
+}
+
+/**
+ * A full-circle extension of Baraja's explicit rank-to-transform mechanism.
+ * Poses remain deterministic and front-to-back ordering is encoded as z-index.
+ */
+export function computeBarajaOrbit(
+  count: number,
+  settings: Partial<BarajaOrbitSettings> = {},
+): BarajaOrbitPose[] {
+  if (!Number.isInteger(count) || count < 0) {
+    throw new RangeError('count must be a non-negative integer')
+  }
+  if (count === 0) return []
+
+  const radiusX = settings.radiusX ?? 140
+  const radiusY = settings.radiusY ?? 184
+  const startAngle = settings.startAngle ?? -90
+  const faceCenter = settings.faceCenter ?? true
+
+  return Array.from({ length: count }, (_, rank) => {
+    const angle = startAngle + (360 / count) * rank
+    const radians = angle * Math.PI / 180
+    return {
+      translateX: Math.cos(radians) * radiusX,
+      translateY: Math.sin(radians) * radiusY,
+      rotation: faceCenter ? angle + 90 : angle - 90,
+      angle,
+      zIndex: 1000 + Math.round((Math.sin(radians) + 1) * 100) + rank,
     }
   })
 }

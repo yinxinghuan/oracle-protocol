@@ -1,13 +1,13 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
-import { BarajaDeck } from './lib/baraja-deck'
 import { TAROT_CARDS } from './data/cards'
+import { getPlainReading } from './data/plain-readings'
+import { computeBarajaOrbit } from './lib/baraja-layout'
 import type { DrawnCard, GamePhase, Locale, Position, TarotCard } from './types'
 import { useI18n } from './i18n'
 import { usePlayerName } from './hooks/usePlayerName'
@@ -31,7 +31,7 @@ function randomFloat() {
       crypto.getRandomValues(value)
       return value[0] / 4294967296
     } catch {
-      // Math.random remains sufficient for a non-cryptographic card shuffle.
+      // Math.random is sufficient for this entertainment-only shuffle.
     }
   }
   return Math.random()
@@ -46,10 +46,6 @@ function shuffledCards() {
   return next
 }
 
-function wait(duration: number) {
-  return new Promise<void>((resolve) => window.setTimeout(resolve, duration))
-}
-
 function isReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
@@ -57,8 +53,8 @@ function isReducedMotion() {
 function positionLabel(position: Position, locale: Locale) {
   const labels = {
     past: { zh: '过去', en: 'PAST' },
-    present: { zh: '现在', en: 'PRESENT' },
-    future: { zh: '未来', en: 'FUTURE' },
+    present: { zh: '当下', en: 'PRESENT' },
+    future: { zh: '下一步', en: 'NEXT STEP' },
   }
   return labels[position][locale]
 }
@@ -71,7 +67,7 @@ interface CardFaceProps {
 
 function CardFace({ drawn, locale, compact = false }: CardFaceProps) {
   const [failed, setFailed] = useState(false)
-  const orientation = drawn.reversed ? drawn.card.reversed : drawn.card.upright
+  const reading = getPlainReading(drawn.card.id, drawn.reversed)
 
   return (
     <article
@@ -92,12 +88,7 @@ function CardFace({ drawn, locale, compact = false }: CardFaceProps) {
             className={drawn.reversed ? 'op-card-face__image--reversed' : ''}
           />
         )}
-        {failed && (
-          <div className="op-card-face__fallback">
-            <span />
-            <i />
-          </div>
-        )}
+        {failed && <div className="op-card-face__fallback"><span /><i /></div>}
       </div>
       <div className="op-card-face__etching" aria-hidden="true" />
       <header className="op-card-face__header">
@@ -107,17 +98,13 @@ function CardFace({ drawn, locale, compact = false }: CardFaceProps) {
       <footer className="op-card-face__footer">
         <strong>{drawn.card.title[locale]}</strong>
         <span>{drawn.reversed ? (locale === 'zh' ? '逆位' : 'REVERSED') : (locale === 'zh' ? '正位' : 'UPRIGHT')}</span>
-        {!compact && <em>{orientation.keyword[locale]}</em>}
+        {!compact && <em>{reading.headline[locale]}</em>}
       </footer>
     </article>
   )
 }
 
-interface CardBackProps {
-  label: string
-}
-
-function CardBack({ label }: CardBackProps) {
+function CardBack({ label }: { label: string }) {
   const [failed, setFailed] = useState(false)
   return (
     <div className="op-card-back" aria-label={label}>
@@ -129,11 +116,7 @@ function CardBack({ label }: CardBackProps) {
           onError={() => setFailed(true)}
         />
       )}
-      <div className="op-card-back__sigil" aria-hidden="true">
-        <span />
-        <i />
-        <b />
-      </div>
+      <div className="op-card-back__sigil" aria-hidden="true"><span /><i /><b /></div>
     </div>
   )
 }
@@ -144,244 +127,234 @@ export default function OracleProtocol() {
   const [phase, setPhase] = useState<GamePhase>('intro')
   const [remaining, setRemaining] = useState<TarotCard[]>([])
   const [drawn, setDrawn] = useState<DrawnCard[]>([])
-  const [revealedCount, setRevealedCount] = useState(0)
+  const [candidate, setCandidate] = useState<DrawnCard | null>(null)
   const [locked, setLocked] = useState(false)
+  const [readingPage, setReadingPage] = useState(0)
   const [showInfo, setShowInfo] = useState(false)
-  const [revealBurst, setRevealBurst] = useState<{ key: number; rare: boolean } | null>(null)
-  const deckElementRef = useRef<HTMLDivElement | null>(null)
-  const deckControllerRef = useRef<BarajaDeck | null>(null)
+  const [revealBurst, setRevealBurst] = useState(false)
+  const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight })
+  const actionLockRef = useRef(false)
 
-  const protocolId = useMemo(() => {
-    const source = drawn.map(({ card, reversed }) => `${card.number}${reversed ? 'R' : 'U'}`).join('')
-    let hash = 2166136261
-    for (const char of source) {
-      hash ^= char.charCodeAt(0)
-      hash = Math.imul(hash, 16777619)
-    }
-    return `OP-${Math.abs(hash >>> 0).toString(16).slice(0, 6).toUpperCase().padStart(6, '0')}`
-  }, [drawn])
+  const position = POSITIONS[Math.min(drawn.length, 2)]
+  const progressNumber = drawn.length + 1
 
-  const fanSettings = useCallback(() => {
-    const narrow = window.innerWidth <= 340
-    const short = window.innerHeight <= 640
-    return {
-      speed: isReducedMotion() ? 0 : 520,
-      easing: 'cubic-bezier(.22,.7,.18,1)',
-      range: narrow ? 38 : short ? 44 : 54,
-      direction: 'right' as const,
-      origin: { minX: 18, maxX: 82, y: 112 },
-      center: true,
-      translation: narrow ? 12 : short ? 16 : 22,
-      scatter: false,
-    }
+  useEffect(() => {
+    const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight })
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  useLayoutEffect(() => {
-    if (phase !== 'choosing' || !deckElementRef.current) {
-      deckControllerRef.current?.destroy()
-      deckControllerRef.current = null
-      return
-    }
+  const orbit = useMemo(() => {
+    const short = viewport.height <= 640
+    const narrow = viewport.width <= 340
+    return computeBarajaOrbit(remaining.length, {
+      radiusX: narrow ? 103 : 138,
+      radiusY: short ? 126 : 178,
+      startAngle: -90,
+      faceCenter: true,
+    })
+  }, [remaining.length, viewport])
 
-    if (!deckControllerRef.current) {
-      deckControllerRef.current = new BarajaDeck(deckElementRef.current, {
-        speed: isReducedMotion() ? 0 : 260,
-        easing: 'cubic-bezier(.22,.7,.18,1)',
-        cycleGap: 12,
-      })
-    } else {
-      deckControllerRef.current.refresh()
-    }
-
-    setLocked(true)
-    let active = true
-    const safetyUnlock = window.setTimeout(() => {
-      if (active) setLocked(false)
-    }, isReducedMotion() ? 120 : 900)
-    void deckControllerRef.current.fan(fanSettings())
-      .catch(() => false)
-      .finally(() => {
-        window.clearTimeout(safetyUnlock)
-        if (active) setLocked(false)
-      })
-    return () => {
-      active = false
-      window.clearTimeout(safetyUnlock)
-    }
-  }, [fanSettings, phase, remaining])
-
-  useEffect(() => () => {
-    deckControllerRef.current?.destroy()
-  }, [])
+  const candidateIndex = candidate
+    ? remaining.findIndex((card) => card.id === candidate.card.id)
+    : -1
+  const candidatePose = candidateIndex >= 0 ? orbit[candidateIndex] : null
 
   const begin = useCallback(() => {
-    if (locked) return
+    if (actionLockRef.current) return
+    actionLockRef.current = true
+    setLocked(true)
+    setDrawn([])
+    setCandidate(null)
+    setReadingPage(0)
+    setRemaining(shuffledCards())
+    setPhase('shuffling')
     void unlockAudio()
     sounds.begin()
     sounds.shuffle()
-    setLocked(true)
-    setDrawn([])
-    setRevealedCount(0)
-    setRemaining(shuffledCards())
-    setPhase('shuffling')
     window.setTimeout(() => {
       setPhase('choosing')
-    }, isReducedMotion() ? 120 : 700)
-  }, [locked])
+      setLocked(false)
+      actionLockRef.current = false
+    }, isReducedMotion() ? 120 : 560)
+  }, [])
 
-  const handleDraw = useCallback(async (card: TarotCard, element: HTMLButtonElement) => {
-    const controller = deckControllerRef.current
-    if (!controller || locked || drawn.length >= 3) return
+  const chooseCard = useCallback((card: TarotCard) => {
+    if (locked || actionLockRef.current) return
+    actionLockRef.current = true
     setLocked(true)
     sounds.draw()
-    await controller.bringToFront(element)
-
-    if (!isReducedMotion() && typeof element.animate === 'function') {
-      const drawAnimation = element.animate([
-        { transform: element.style.transform, opacity: 1 },
-        { transform: 'translateY(-34px) scale(.74) rotate(0deg)', opacity: 0 },
-      ], {
-        duration: 280,
-        easing: 'cubic-bezier(.3,.8,.25,1)',
-        fill: 'forwards',
-      })
-      await Promise.race([
-        drawAnimation.finished.catch(() => undefined),
-        wait(440),
-      ])
-      drawAnimation.cancel()
-    }
-
-    const nextDraw: DrawnCard = {
-      card,
-      reversed: randomFloat() < 0.35,
-    }
-    const finalCard = drawn.length === 2
-    setDrawn((current) => [...current, nextDraw])
-    setRemaining((current) => current.filter((item) => item.id !== card.id))
-
-    if (finalCard) {
-      setRevealedCount(0)
-      setPhase('reveal')
+    setCandidate({ card, reversed: randomFloat() < 0.35 })
+    setPhase('focus')
+    window.setTimeout(() => {
       setLocked(false)
-    }
-  }, [drawn.length, locked])
+      actionLockRef.current = false
+    }, isReducedMotion() ? 120 : 460)
+  }, [locked])
 
-  const revealNext = useCallback(async () => {
-    if (locked) return
-    if (revealedCount >= drawn.length) {
-      sounds.complete()
-      setPhase('reading')
-      return
-    }
-
+  const chooseAgain = useCallback(() => {
+    if (locked || actionLockRef.current) return
+    actionLockRef.current = true
     setLocked(true)
-    const current = drawn[revealedCount]
-    if (current.card.holographic) sounds.rare()
+    setPhase('choosing')
+    window.setTimeout(() => {
+      setCandidate(null)
+      setLocked(false)
+      actionLockRef.current = false
+    }, isReducedMotion() ? 80 : 280)
+  }, [locked])
+
+  const revealCard = useCallback(() => {
+    if (!candidate || locked || actionLockRef.current) return
+    actionLockRef.current = true
+    setLocked(true)
+    setPhase('reveal')
+    setRevealBurst(true)
+    if (candidate.card.holographic) sounds.rare()
     else sounds.reveal()
-    setRevealBurst({ key: Date.now(), rare: current.card.holographic })
-    window.setTimeout(() => setRevealBurst(null), current.card.holographic ? 900 : 520)
-    setRevealedCount((count) => count + 1)
-    await wait(isReducedMotion() ? 140 : 600)
-    setLocked(false)
-  }, [drawn, locked, revealedCount])
+    window.setTimeout(() => setRevealBurst(false), candidate.card.holographic ? 900 : 560)
+    window.setTimeout(() => {
+      setLocked(false)
+      actionLockRef.current = false
+    }, isReducedMotion() ? 120 : 620)
+  }, [candidate, locked])
+
+  const showMeaning = useCallback(() => {
+    if (locked) return
+    setPhase('meaning')
+  }, [locked])
+
+  const acceptCard = useCallback(() => {
+    if (!candidate || locked || actionLockRef.current) return
+    actionLockRef.current = true
+    setLocked(true)
+    const isFinal = drawn.length === 2
+    setDrawn((current) => [...current, candidate])
+    setRemaining((current) => current.filter((card) => card.id !== candidate.card.id))
+    sounds.complete()
+    window.setTimeout(() => {
+      setCandidate(null)
+      setLocked(false)
+      actionLockRef.current = false
+      if (isFinal) {
+        setReadingPage(0)
+        setPhase('reading')
+      } else {
+        setPhase('choosing')
+      }
+    }, isReducedMotion() ? 100 : 360)
+  }, [candidate, drawn.length, locked])
+
+  const activeReading = readingPage < 3 ? drawn[readingPage] : null
+  const activePlain = activeReading
+    ? getPlainReading(activeReading.card.id, activeReading.reversed)
+    : null
+
+  const summary = useMemo(() => {
+    if (drawn.length < 3) return ''
+    const first = getPlainReading(drawn[0].card.id, drawn[0].reversed)
+    const second = getPlainReading(drawn[1].card.id, drawn[1].reversed)
+    if (locale === 'zh') {
+      return `${first.headline.zh}；${second.headline.zh}。现在，把注意力放回你能做的下一步。`
+    }
+    return `${first.headline.en}; ${second.headline.en}. Now return your attention to the next step you can take.`
+  }, [drawn, locale])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === 'Escape' && phase === 'focus') {
         event.preventDefault()
-        if (phase === 'intro') begin()
-        else if (phase === 'reveal') void revealNext()
-        else if (phase === 'reading') begin()
+        chooseAgain()
         return
       }
-      if (phase !== 'choosing' || locked || !['1', '2', '3'].includes(event.key)) return
-      const candidates = [0, Math.floor((remaining.length - 1) / 2), remaining.length - 1]
-      const card = remaining[candidates[Number(event.key) - 1]]
-      const element = deckElementRef.current?.querySelector<HTMLButtonElement>(`[data-card-id="${card?.id}"]`)
-      if (card && element) void handleDraw(card, element)
+      if (event.key !== 'Enter' && event.key !== ' ') return
+      if ((event.target as HTMLElement)?.closest('button')) return
+      event.preventDefault()
+      if (phase === 'intro') begin()
+      else if (phase === 'focus') revealCard()
+      else if (phase === 'reveal') showMeaning()
+      else if (phase === 'meaning') acceptCard()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [begin, handleDraw, locked, phase, remaining, revealNext])
+  }, [acceptCard, begin, chooseAgain, phase, revealCard, showMeaning])
 
-  const choicePrompt = drawn.length === 0
-    ? t('choosePast')
-    : drawn.length === 1
-      ? t('choosePresent')
-      : t('chooseFuture')
+  const progress = (
+    <div className="op-progress" aria-label={t('cardProgress', {
+      position: positionLabel(position, locale),
+      n: progressNumber,
+    })}>
+      <span>{positionLabel(position, locale)}</span>
+      <div>{POSITIONS.map((item, index) => <i className={index < drawn.length ? 'is-filled' : index === drawn.length ? 'is-current' : ''} key={item} />)}</div>
+      <b>{progressNumber}/3</b>
+    </div>
+  )
 
-  const revealButtonLabel = revealedCount === 0
-    ? t('revealNextPast')
-    : revealedCount === 1
-      ? t('revealNextPresent')
-      : revealedCount === 2
-        ? t('revealNextFuture')
-        : t('openReading')
-
-  const lastRevealed = revealedCount > 0 ? drawn[revealedCount - 1] : null
+  const orbitCards = (
+    <div className={`op-orbit ${phase === 'focus' ? 'op-orbit--receded' : ''}`} aria-hidden={phase === 'focus'}>
+      <div className="op-orbit__track" aria-hidden="true" />
+      {remaining.map((card, index) => {
+        const pose = orbit[index]
+        const selected = candidate?.card.id === card.id
+        return (
+          <button
+            className={`op-orbit__card ${selected ? 'is-selected' : ''}`}
+            type="button"
+            key={card.id}
+            data-card-id={card.id}
+            aria-label={t('chooseCard', { n: index + 1 })}
+            disabled={phase !== 'choosing' || locked}
+            onPointerDown={() => chooseCard(card)}
+            style={{
+              '--orbit-x': `${pose.translateX}px`,
+              '--orbit-y': `${pose.translateY}px`,
+              '--orbit-rotation': `${pose.rotation}deg`,
+              '--orbit-delay': `${index * 18}ms`,
+              zIndex: pose.zIndex,
+            } as React.CSSProperties}
+          >
+            <CardBack label="" />
+          </button>
+        )
+      })}
+    </div>
+  )
 
   return (
     <main className={`op op--${phase}`}>
       <div className="op__ambient" aria-hidden="true">
-        {Array.from({ length: 22 }, (_, index) => (
-          <i
-            key={index}
-            style={{
-              '--x': `${(index * 41) % 100}%`,
-              '--y': `${(index * 67) % 92}%`,
-              '--h': `${3 + (index % 3) * 2}px`,
-              '--opacity': 0.08 + (index % 5) * 0.025,
-              '--duration': `${8 + (index % 7)}s`,
-              '--delay': `${index * -0.47}s`,
-              '--rotation': `${index * 23}deg`,
-              '--rotation-end': `${index * 23 + 9}deg`,
-            } as React.CSSProperties}
-          />
+        {Array.from({ length: 18 }, (_, index) => (
+          <i key={index} style={{
+            '--x': `${(index * 41) % 100}%`,
+            '--y': `${(index * 67) % 92}%`,
+            '--duration': `${8 + (index % 7)}s`,
+            '--delay': `${index * -0.47}s`,
+          } as React.CSSProperties} />
         ))}
       </div>
 
       <header className="op__topbar">
         <span>OP / ARCANA.12</span>
         <div className="op__tools">
-          <button
-            className="op__tool"
-            type="button"
-            onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')}
-            aria-label={locale === 'zh' ? 'Switch to English' : '切换到中文'}
-          >
+          <button className="op__tool" type="button" onClick={() => setLocale(locale === 'zh' ? 'en' : 'zh')} aria-label={locale === 'zh' ? 'Switch to English' : '切换到中文'}>
             {locale === 'zh' ? 'EN' : '中'}
           </button>
-          <button
-            className="op__tool"
-            type="button"
-            onClick={() => setShowInfo(true)}
-            aria-label={t('info')}
-          >
-            <InfoIcon />
-          </button>
+          <button className="op__tool" type="button" onClick={() => setShowInfo(true)} aria-label={t('info')}><InfoIcon /></button>
         </div>
       </header>
 
       {phase === 'intro' && (
         <section className="op-intro">
-          <div className="op-intro__mark" aria-hidden="true">
-            <span />
-            <i />
-            <b />
-          </div>
           <p className="op__eyebrow">{t('subtitle')}</p>
           <h1>{t('protocol')}</h1>
           <p className="op-intro__promise">{t('promise')}</p>
-          <div className="op-intro__stack" aria-hidden="true">
-            <div><CardBack label="" /></div>
-            <div><CardBack label="" /></div>
-            <div><CardBack label="" /></div>
+          <div className="op-intro__portal" aria-hidden="true">
+            <i /><b />
+            <div className="op-intro__stack"><div><CardBack label="" /></div><div><CardBack label="" /></div><div><CardBack label="" /></div></div>
           </div>
           <p className="op-intro__for">{t('startFor', { name: playerName })}</p>
           <button className="op-button op-button--primary" type="button" onPointerDown={begin}>
-            <SparkIcon />
-            <span>{t('start')}</span>
+            <SparkIcon /><span>{t('start')}</span>
           </button>
           <p className="op__disclaimer">{t('disclaimer')}</p>
         </section>
@@ -391,171 +364,114 @@ export default function OracleProtocol() {
         <section className="op-shuffle" aria-live="polite">
           <p className="op__eyebrow">{t('shuffling')}</p>
           <div className="op-shuffle__deck" aria-hidden="true">
-            <div><CardBack label="" /></div>
-            <div><CardBack label="" /></div>
-            <div><CardBack label="" /></div>
-            <div><CardBack label="" /></div>
+            {Array.from({ length: 5 }, (_, index) => <div key={index}><CardBack label="" /></div>)}
           </div>
           <div className="op-binding-loader" aria-hidden="true"><i /><i /><i /></div>
         </section>
       )}
 
       {phase === 'choosing' && (
-        <section className="op-choose">
-          <div className="op-choose__heading" aria-live="polite">
-            <p className="op__eyebrow">{t('cardCount', { n: drawn.length })}</p>
-            <h2>{choicePrompt}</h2>
-          </div>
-          <div className="op-slots op-slots--small">
-            {POSITIONS.map((position, index) => (
-              <div className={`op-slot ${drawn[index] ? 'op-slot--filled' : ''}`} key={position}>
-                <span>{positionLabel(position, locale)}</span>
-                {drawn[index] && <CardBack label={positionLabel(position, locale)} />}
-              </div>
-            ))}
-          </div>
-          <div className="op-choose__stage">
-            <div className="baraja-deck op-deck" ref={deckElementRef}>
-              {remaining.map((card, index) => (
-                <button
-                  className="baraja-deck__card op-deck__card"
-                  type="button"
-                  key={card.id}
-                  data-card-id={card.id}
-                  aria-label={t('chooseCard', { n: index + 1 })}
-                  disabled={locked}
-                  onPointerDown={(event) => void handleDraw(card, event.currentTarget)}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Enter' && event.key !== ' ') return
-                    event.preventDefault()
-                    event.stopPropagation()
-                    void handleDraw(card, event.currentTarget)
-                  }}
-                >
-                  <CardBack label="" />
-                </button>
-              ))}
-            </div>
-          </div>
-          <p className="op-choose__hint">{t('chooseHint')}</p>
+        <section className="op-choice">
+          {progress}
+          <h1>{t('tapOne')}</h1>
+          <div className="op-choice__stage">{orbitCards}<div className="op-choice__center-mark" aria-hidden="true"><SparkIcon /></div></div>
         </section>
       )}
 
-      {phase === 'reveal' && (
-        <section className="op-reveal">
-          {revealBurst && (
+      {phase === 'focus' && candidate && (
+        <section className="op-focus">
+          {progress}
+          <div className="op-focus__stage">
+            {orbitCards}
             <div
-              className={`op-reveal__burst ${revealBurst.rare ? 'op-reveal__burst--rare' : ''}`}
-              key={revealBurst.key}
-              aria-hidden="true"
+              className="op-hero-card op-hero-card--back"
+              style={{
+                '--focus-from-x': `${candidatePose?.translateX ?? 0}px`,
+                '--focus-from-y': `${candidatePose?.translateY ?? 0}px`,
+                '--focus-from-rotation': `${candidatePose?.rotation ?? 0}deg`,
+              } as React.CSSProperties}
             >
-              {Array.from({ length: revealBurst.rare ? 10 : 6 }, (_, index) => (
-                <i
-                  key={index}
-                  style={{
-                    '--burst-angle': `${index * (360 / (revealBurst.rare ? 10 : 6)) + 9}deg`,
-                    '--burst-distance': `${48 + (index % 3) * 14}px`,
-                    '--burst-delay': `${(index % 4) * 24}ms`,
-                  } as React.CSSProperties}
-                />
-              ))}
+              <CardBack label={t('focusTitle')} />
             </div>
-          )}
-          <div className="op-reveal__heading">
-            <p className="op__eyebrow">{t('revealIntro')}</p>
-            <h2>{revealedCount < 3 ? positionLabel(POSITIONS[revealedCount], locale) : t('complete')}</h2>
           </div>
-          <div className="op-reveal__cards">
-            {drawn.map((item, index) => (
-              <div className={`op-flip ${index < revealedCount ? 'op-flip--revealed' : ''}`} key={item.card.id}>
-                <div className="op-flip__inner">
-                  <div className="op-flip__side op-flip__back">
-                    <CardBack label={positionLabel(POSITIONS[index], locale)} />
-                  </div>
-                  <div className="op-flip__side op-flip__front">
-                    <CardFace drawn={item} locale={locale} compact />
-                  </div>
-                </div>
-                <span className="op-flip__position">{positionLabel(POSITIONS[index], locale)}</span>
-              </div>
-            ))}
+          <div className="op-focus__copy">
+            <p className="op__eyebrow">{t('focusTitle')}</p>
+            <h1>{t('focusHint', { position: positionLabel(position, locale) })}</h1>
           </div>
-          <div className="op-reveal__meaning" aria-live="polite">
-            {lastRevealed ? (
-              <>
-                <strong>
-                  {(lastRevealed.reversed ? lastRevealed.card.reversed : lastRevealed.card.upright).keyword[locale]}
-                </strong>
-                <p>
-                  {(lastRevealed.reversed ? lastRevealed.card.reversed : lastRevealed.card.upright).meaning[locale]}
-                </p>
-              </>
-            ) : <p>{t('promise')}</p>}
+          <div className="op-actions">
+            <button className="op-button op-button--primary" type="button" disabled={locked} onPointerDown={revealCard}><SparkIcon /><span>{t('revealCard')}</span></button>
+            <button className="op-button op-button--text" type="button" disabled={locked} onClick={chooseAgain}>{t('chooseAgain')}</button>
           </div>
-          <button
-            className="op-button op-button--primary"
-            type="button"
-            disabled={locked}
-            onPointerDown={() => void revealNext()}
-          >
-            <SparkIcon />
-            <span>{revealButtonLabel}</span>
-          </button>
         </section>
       )}
 
-      {phase === 'reading' && (
-        <section className="op-reading">
-          <div className="op-reading__seal" aria-hidden="true"><SparkIcon /></div>
-          <p className="op__eyebrow">{protocolId} · {t('complete')}</p>
-          <h1>{t('readingFor', { name: playerName })}</h1>
-          <div className="op-reading__spread">
-            {drawn.map((item, index) => (
-              <div key={item.card.id}>
-                <span>{positionLabel(POSITIONS[index], locale)}</span>
-                <CardFace drawn={item} locale={locale} compact />
-              </div>
-            ))}
-          </div>
-          <div className="op-reading__sections">
-            {drawn.map((item, index) => {
-              const orientation = item.reversed ? item.card.reversed : item.card.upright
-              const heading = index === 0 ? t('signal') : index === 1 ? t('model') : t('iteration')
-              return (
-                <article key={item.card.id}>
-                  <span>{String(index + 1).padStart(2, '0')}</span>
-                  <div>
-                    <h2>{heading} · {orientation.keyword[locale]}</h2>
-                    <p>{orientation.meaning[locale]}</p>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-          {drawn[2] && (
-            <blockquote>
-              <span>{t('reflection')}</span>
-              <p>{(drawn[2].reversed ? drawn[2].card.reversed : drawn[2].card.upright).reflection[locale]}</p>
-            </blockquote>
+      {(phase === 'reveal' || phase === 'meaning') && candidate && (
+        <section className={`op-single ${phase === 'meaning' ? 'op-single--meaning' : ''}`}>
+          {progress}
+          {revealBurst && (
+            <div className={`op-reveal-burst ${candidate.card.holographic ? 'is-rare' : ''}`} aria-hidden="true">
+              {Array.from({ length: candidate.card.holographic ? 10 : 6 }, (_, index) => <i key={index} style={{ '--burst-angle': `${index * (360 / (candidate.card.holographic ? 10 : 6))}deg`, '--burst-delay': `${index * 24}ms` } as React.CSSProperties} />)}
+            </div>
           )}
-          <details className="op-reading__details">
-            <summary>{t('meanings')}</summary>
-            {drawn.map((item) => {
-              const orientation = item.reversed ? item.card.reversed : item.card.upright
-              return (
-                <article key={item.card.id}>
-                  <h3>{item.card.title[locale]} · {item.reversed ? t('reversed') : t('upright')}</h3>
-                  <p>{orientation.meaning[locale]}</p>
-                  <small>{t('classic', { name: item.card.classic[locale] })}</small>
-                </article>
-              )
-            })}
-          </details>
-          <p className="op__disclaimer">{t('disclaimer')}</p>
-          <button className="op-button op-button--primary" type="button" onClick={begin}>
-            <ResetIcon />
-            <span>{t('again')}</span>
-          </button>
+          <div className="op-single__card"><CardFace drawn={candidate} locale={locale} /></div>
+          {phase === 'reveal' ? (
+            <div className="op-single__reveal-copy">
+              <p className="op__eyebrow">{positionLabel(position, locale)} · {candidate.reversed ? t('reversed') : t('upright')}</p>
+              <h1>{getPlainReading(candidate.card.id, candidate.reversed).headline[locale]}</h1>
+              <button className="op-button op-button--primary" type="button" disabled={locked} onPointerDown={showMeaning}><span>{t('revealMeaning')}</span></button>
+            </div>
+          ) : (
+            <div className="op-single__meaning">
+              <p>{getPlainReading(candidate.card.id, candidate.reversed).message[locale]}</p>
+              <aside>
+                <span>{t('todayAction')}</span>
+                <strong>{getPlainReading(candidate.card.id, candidate.reversed).action[locale]}</strong>
+              </aside>
+              <button className="op-button op-button--primary" type="button" disabled={locked} onPointerDown={acceptCard}>
+                <SparkIcon />
+                <span>{drawn.length === 2 ? t('openReading') : t('nextCard')}</span>
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {phase === 'reading' && drawn.length === 3 && (
+        <section className="op-reading-page">
+          <p className="op__eyebrow">{t('pageProgress', { n: readingPage + 1 })}</p>
+          {readingPage < 3 && activeReading && activePlain ? (
+            <>
+              <header>
+                <span>{positionLabel(POSITIONS[readingPage], locale)}</span>
+                <h1>{activePlain.headline[locale]}</h1>
+              </header>
+              <div className="op-reading-page__card"><CardFace drawn={activeReading} locale={locale} compact /></div>
+              <div className="op-reading-page__copy">
+                <p>{activePlain.message[locale]}</p>
+                <aside><span>{t('question')}</span><strong>{(activeReading.reversed ? activeReading.card.reversed : activeReading.card.upright).reflection[locale]}</strong></aside>
+              </div>
+            </>
+          ) : (
+            <div className="op-reading-page__today">
+              <div className="op-reading-page__seal"><SparkIcon /></div>
+              <span>{t('today')}</span>
+              <h1>{t('todayLead')}</h1>
+              <p>{summary}</p>
+              <aside>
+                <span>{t('todayAction')}</span>
+                <strong>{getPlainReading(drawn[2].card.id, drawn[2].reversed).action[locale]}</strong>
+              </aside>
+              <p className="op__disclaimer">{t('disclaimer')}</p>
+            </div>
+          )}
+          <nav className="op-reading-page__nav">
+            {readingPage > 0 && <button className="op-button op-button--text" type="button" onClick={() => setReadingPage((page) => page - 1)}>{t('previous')}</button>}
+            {readingPage < 3 ? (
+              <button className="op-button op-button--primary" type="button" onClick={() => setReadingPage((page) => page + 1)}><span>{t('next')}</span></button>
+            ) : (
+              <button className="op-button op-button--primary" type="button" onClick={begin}><ResetIcon /><span>{t('again')}</span></button>
+            )}
+          </nav>
         </section>
       )}
 
@@ -564,11 +480,8 @@ export default function OracleProtocol() {
           <div className="op-modal__panel">
             <p className="op__eyebrow">OP / NOTE</p>
             <h2 id="op-info-title">{t('info')}</h2>
-            <p>{t('promise')}</p>
-            <p>{t('disclaimer')}</p>
-            <button className="op-button op-button--secondary" type="button" onClick={() => setShowInfo(false)}>
-              {t('close')}
-            </button>
+            <p>{t('promise')}</p><p>{t('disclaimer')}</p>
+            <button className="op-button op-button--text" type="button" onClick={() => setShowInfo(false)}>{t('close')}</button>
           </div>
         </div>
       )}
