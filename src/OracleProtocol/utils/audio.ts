@@ -24,41 +24,49 @@ function tone(
 ) {
   const audio = getContext()
   if (!audio) return
-  const start = audio.currentTime + delay
-  const oscillator = audio.createOscillator()
-  const gain = audio.createGain()
-  oscillator.type = type
-  oscillator.frequency.setValueAtTime(frequency, start)
-  if (endFrequency) {
-    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration)
+  try {
+    const start = audio.currentTime + delay
+    const oscillator = audio.createOscillator()
+    const gain = audio.createGain()
+    oscillator.type = type
+    oscillator.frequency.setValueAtTime(frequency, start)
+    if (endFrequency) {
+      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration)
+    }
+    gain.gain.setValueAtTime(0.0001, start)
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.025)
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
+    oscillator.connect(gain).connect(audio.destination)
+    oscillator.start(start)
+    oscillator.stop(start + duration + 0.03)
+  } catch {
+    // Audio is optional and must never block the game state machine.
   }
-  gain.gain.setValueAtTime(0.0001, start)
-  gain.gain.exponentialRampToValueAtTime(volume, start + 0.025)
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration)
-  oscillator.connect(gain).connect(audio.destination)
-  oscillator.start(start)
-  oscillator.stop(start + duration + 0.03)
 }
 
 function noisePulse(delay: number) {
   const audio = getContext()
   if (!audio) return
-  const length = Math.floor(audio.sampleRate * 0.04)
-  const buffer = audio.createBuffer(1, length, audio.sampleRate)
-  const data = buffer.getChannelData(0)
-  for (let index = 0; index < length; index += 1) {
-    data[index] = (Math.random() * 2 - 1) * (1 - index / length)
+  try {
+    const length = Math.floor(audio.sampleRate * 0.04)
+    const buffer = audio.createBuffer(1, length, audio.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let index = 0; index < length; index += 1) {
+      data[index] = (Math.random() * 2 - 1) * (1 - index / length)
+    }
+    const source = audio.createBufferSource()
+    const filter = audio.createBiquadFilter()
+    const gain = audio.createGain()
+    filter.type = 'bandpass'
+    filter.frequency.value = 1300
+    filter.Q.value = 0.8
+    gain.gain.value = 0.055
+    source.buffer = buffer
+    source.connect(filter).connect(gain).connect(audio.destination)
+    source.start(audio.currentTime + delay)
+  } catch {
+    // Audio is optional and must never block the game state machine.
   }
-  const source = audio.createBufferSource()
-  const filter = audio.createBiquadFilter()
-  const gain = audio.createGain()
-  filter.type = 'bandpass'
-  filter.frequency.value = 1300
-  filter.Q.value = 0.8
-  gain.gain.value = 0.055
-  source.buffer = buffer
-  source.connect(filter).connect(gain).connect(audio.destination)
-  source.start(audio.currentTime + delay)
 }
 
 export async function unlockAudio() {

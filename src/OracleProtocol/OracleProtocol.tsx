@@ -25,10 +25,14 @@ function assetUrl(file: string) {
 }
 
 function randomFloat() {
-  if (typeof globalThis.crypto !== 'undefined') {
-    const value = new Uint32Array(1)
-    crypto.getRandomValues(value)
-    return value[0] / 4294967296
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    try {
+      const value = new Uint32Array(1)
+      crypto.getRandomValues(value)
+      return value[0] / 4294967296
+    } catch {
+      // Math.random remains sufficient for a non-cryptographic card shuffle.
+    }
   }
   return Math.random()
 }
@@ -191,11 +195,18 @@ export default function OracleProtocol() {
 
     setLocked(true)
     let active = true
-    void deckControllerRef.current.fan(fanSettings()).then(() => {
+    const safetyUnlock = window.setTimeout(() => {
       if (active) setLocked(false)
-    })
+    }, isReducedMotion() ? 120 : 900)
+    void deckControllerRef.current.fan(fanSettings())
+      .catch(() => false)
+      .finally(() => {
+        window.clearTimeout(safetyUnlock)
+        if (active) setLocked(false)
+      })
     return () => {
       active = false
+      window.clearTimeout(safetyUnlock)
     }
   }, [fanSettings, phase, remaining])
 
@@ -226,14 +237,19 @@ export default function OracleProtocol() {
     await controller.bringToFront(element)
 
     if (!isReducedMotion() && typeof element.animate === 'function') {
-      await element.animate([
+      const drawAnimation = element.animate([
         { transform: element.style.transform, opacity: 1 },
         { transform: 'translateY(-34px) scale(.74) rotate(0deg)', opacity: 0 },
       ], {
         duration: 280,
         easing: 'cubic-bezier(.3,.8,.25,1)',
         fill: 'forwards',
-      }).finished.catch(() => undefined)
+      })
+      await Promise.race([
+        drawAnimation.finished.catch(() => undefined),
+        wait(440),
+      ])
+      drawAnimation.cancel()
     }
 
     const nextDraw: DrawnCard = {

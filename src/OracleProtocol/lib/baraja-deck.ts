@@ -288,9 +288,23 @@ export class BarajaDeck {
       fill: 'forwards',
     })
     this.animations.set(card, animation)
-    return animation.finished
-      .then(finish)
-      .catch(() => undefined)
+    return new Promise((resolve) => {
+      let settled = false
+      const timeout = window.setTimeout(() => {
+        complete()
+      }, duration + delay + 160)
+      const complete = () => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(timeout)
+        finish()
+        resolve()
+      }
+
+      // Some embedded mobile WebViews leave Animation.finished pending forever.
+      // The timeout keeps deck input from being permanently locked.
+      void animation.finished.then(complete).catch(complete)
+    })
   }
 
   private motionDuration(duration: number): number {
