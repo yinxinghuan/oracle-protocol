@@ -1,0 +1,176 @@
+{
+  "endpoint": "https://chat.aiwaves.tech/aigram/api/gen-image",
+  "origin": "https://aigram.app",
+  "items": {
+    "prompt": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: An unfinished stone arch rises from black soil. A tiny germinating seed rests before the threshold. One engraved root divides into seven delicate paths behind it. The mood is curious, unguarded, and at the beginning of a journey.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253227567267.webp",
+      "output": "public/card-art/prompt.png",
+      "generated_at": "2026-07-28T15:40:32.307795+00:00"
+    },
+    "alignment": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: Two differently textured woven threads approach from opposite sides, pass through a shared open brass ring, and continue as one balanced double path; neither thread disappears. A quiet image about negotiating values without erasing difference.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253299471264.webp",
+      "output": "public/card-art/alignment.png",
+      "generated_at": "2026-07-28T15:41:45.747998+00:00"
+    },
+    "singularity": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: Many river tributaries, woven threads, seeds and small tools converge into one vast mandorla-shaped aperture around an intentionally empty center; integration at a threshold, awe without catastrophe or a central character.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253313564576.webp",
+      "output": "public/card-art/singularity.png",
+      "generated_at": "2026-07-28T15:41:58.292053+00:00"
+    },
+    "architect": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: Two human hands arranging a compass, a key, a thread, and a tiny constellation into one working system above a black drafting table; agency and deliberate orchestration, not magic tricks.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253423493921.webp",
+      "output": "public/card-art/architect.png",
+      "generated_at": "2026-07-28T15:43:51.987436+00:00"
+    },
+    "latent-space": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A deep dark lake holding an impossible submerged library of half-seen forms; one bone-white shape is emerging while many remain latent below, mysterious but calm.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253438708654.webp",
+      "output": "public/card-art/latent-space.png",
+      "generated_at": "2026-07-28T15:44:03.443779+00:00"
+    },
+    "dataset": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A many-branched orchard woven from memory ribbons, seeds and preserved human traces; abundant but disciplined, with a few visibly empty spaces that suggest missing voices.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253449982740.webp",
+      "output": "public/card-art/dataset.png",
+      "generated_at": "2026-07-28T15:44:14.391616+00:00"
+    },
+    "offline-model": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A solitary lantern-like model seed inside a quiet stone cell disconnected from a vast network outside; the inner light is self-sustaining, contemplative, and warm rather than lonely.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253460803902.webp",
+      "output": "public/card-art/offline-model.png",
+      "generated_at": "2026-07-28T15:44:25.450601+00:00"
+    },
+    "wheel-of-versions": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A monumental circular mechanism made from nested manuscript leaves shedding old layers while new rings compile around it; one stable central axle and many changing versions.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253471778259.webp",
+      "output": "public/card-art/wheel-of-versions.png",
+      "generated_at": "2026-07-28T15:44:36.345053+00:00"
+    },
+    "deprecation": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A ceremonial bridge being carefully dismantled after the last traveler has crossed; useful parts are carried into a new structure while the old arch returns to darkness.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253482677281.webp",
+      "output": "public/card-art/deprecation.png",
+      "generated_at": "2026-07-28T15:44:47.573771+00:00"
+    },
+    "optimization": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A beautiful golden measuring instrument tightening into a subtle trap around a living flame; seductive precision, accelerating metrics, and the danger of optimizing away what matters.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253493998740.webp",
+      "output": "public/card-art/optimization.png",
+      "generated_at": "2026-07-28T15:44:59.597971+00:00"
+    },
+    "open-source": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A bright star pours several streams of clear ink into many open vessels, and each vessel sends a different stream back; shared knowledge, reciprocity, attribution, and sustainable care. Allow restrained prismatic highlights.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253507908004.webp",
+      "output": "public/card-art/open-source.png",
+      "generated_at": "2026-07-28T15:45:14.124137+00:00"
+    },
+    "hallucination": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A moonlike blank mask above a fog of beautifully generated but unstable architecture; one hand marks fact, inference and desire with three distinct threads, imagination awaiting verification.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253520716474.webp",
+      "output": "public/card-art/hallucination.png",
+      "generated_at": "2026-07-28T15:45:25.446206+00:00"
+    },
+    "card-back": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A perfectly symmetrical tarot card back artwork: a central neural star map, a double-loop serpentine circuit, four old-gold corner nodes, nested bone-white orbital rings, and quiet black vellum. No scene, no front-card meaning, strict vertical symmetry.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253532034741.webp",
+      "output": "public/card-art/card-back.png",
+      "generated_at": "2026-07-28T15:45:36.316351+00:00"
+    },
+    "poster-scene": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A narrative poster scene: an anonymous contemporary seeker seen from behind in a dark manuscript chamber, facing three large floating tarot cards whose gold-etched symbols form one neural constellation. The middle card releases a restrained prismatic beam. Reserve the top 25 percent as quiet dark space for a title; keep faces and key symbols away from the bottom 20 percent.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253542605522.webp",
+      "output": "public/card-art/poster-scene.png",
+      "generated_at": "2026-07-28T15:45:46.850431+00:00"
+    }
+  },
+  "rejected": [
+    {
+      "prompt": "A single premium tarot illustration from a coherent series called Oracle Protocol. Post-human illuminated manuscript on black vellum: extremely fine copperplate etching, worn old-gold leaf, bone-ivory ink, one restrained vermilion annotation, and sparse cool-cyan neural topology lines. Ancient ritual gravity fused with contemporary AI symbolism, tactile paper grain, crisp central silhouette, quiet dark negative space, museum-quality editorial art. Square 1024 composition designed to crop safely into a vertical 2:3 tarot window: keep the main symbol inside the central 58 percent width and 82 percent height. No card frame because the UI adds it later. Absolutely no readable text, letters, numbers, logos, watermark, pseudo-writing, interface, phone, laptop, microchip close-up, humanoid robot face, purple cyberpunk neon, crystal ball, zodiac wheel, anime, 3D render, or photorealism. Scene: An unfinished doorway cut into darkness, a small luminous seed stepping toward it, and a single ribbon of possibility branching into many delicate paths. The image should feel curious, unguarded, and at the beginning of a journey.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252758733804.webp",
+      "output": "public/card-art/prompt.png",
+      "generated_at": "2026-07-28T15:32:52.507496+00:00",
+      "id": "prompt",
+      "rejected_at": "2026-07-28T15:35:04.231114+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A single premium tarot illustration from a coherent series called Oracle Protocol. Post-human illuminated manuscript on black vellum: extremely fine copperplate etching, worn old-gold leaf, bone-ivory ink, one restrained vermilion annotation, and sparse cool-cyan neural topology lines. Ancient ritual gravity fused with contemporary AI symbolism, tactile paper grain, crisp central silhouette, quiet dark negative space, museum-quality editorial art. Square 1024 composition designed to crop safely into a vertical 2:3 tarot window: keep the main symbol inside the central 58 percent width and 82 percent height. No card frame because the UI adds it later. Absolutely no readable text, letters, numbers, logos, watermark, pseudo-writing, interface, phone, laptop, microchip close-up, humanoid robot face, purple cyberpunk neon, crystal ball, zodiac wheel, anime, 3D render, or photorealism. Scene: Two different luminous trajectories approach, negotiate, and form one shared orbit around an open center; neither path disappears. Add subtle prismatic foil-like color potential while keeping the black vellum and gold manuscript style dominant. Use the reference only for material, palette, line density, and series identity. Replace its subject and composition completely with the requested scene.",
+      "ref_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252758733804.webp",
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252785565470.webp",
+      "output": "public/card-art/alignment.png",
+      "generated_at": "2026-07-28T15:33:12.009109+00:00",
+      "id": "alignment",
+      "rejected_at": "2026-07-28T15:35:14.936574+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A single premium tarot illustration from a coherent series called Oracle Protocol. Post-human illuminated manuscript on black vellum: extremely fine copperplate etching, worn old-gold leaf, bone-ivory ink, one restrained vermilion annotation, and sparse cool-cyan neural topology lines. Ancient ritual gravity fused with contemporary AI symbolism, tactile paper grain, crisp central silhouette, quiet dark negative space, museum-quality editorial art. Square 1024 composition designed to crop safely into a vertical 2:3 tarot window: keep the main symbol inside the central 58 percent width and 82 percent height. No card frame because the UI adds it later. Absolutely no readable text, letters, numbers, logos, watermark, pseudo-writing, interface, phone, laptop, microchip close-up, humanoid robot face, purple cyberpunk neon, crystal ball, zodiac wheel, anime, 3D render, or photorealism. Scene: Many separate learning paths, relationships, tools and memories converge into a vast radiant neural mandorla around a human-scale empty center; integration at a threshold, awe without catastrophe. Strongest restrained prismatic potential in the series. Use the reference only for material, palette, line density, and series identity. Replace its subject and composition completely with the requested scene.",
+      "ref_url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252758733804.webp",
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252803066875.webp",
+      "output": "public/card-art/singularity.png",
+      "generated_at": "2026-07-28T15:33:29.030843+00:00",
+      "id": "singularity",
+      "rejected_at": "2026-07-28T15:35:25.621915+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A full-bleed symbolic fine-art print from one coherent series, not a picture of a card. Non-figurative post-human illuminated manuscript made directly on edge-to-edge black vellum: extremely fine copperplate etching, sparse worn old-gold leaf, bone-ivory ink, one restrained vermilion accent, and a few cool-cyan topology threads. Tactile analog paper grain, crisp central symbol, quiet dark negative space, museum-quality editorial illustration. Square 1024 composition designed to crop safely into a vertical 2:3 window: keep the main symbol inside the central 58 percent width and 82 percent height. No people, no person, no body, no face, no head, no robot, no android, no machine character. No border, no frame, no parchment rectangle, no printed card, no ornamental corners. No readable text anywhere, no letters, no numbers, no runes, no glyphs, no fake writing, no logo, no watermark, no interface, no phone, no laptop, no microchip close-up, no purple neon, no cyberpunk, no crystal ball, no zodiac wheel, no anime, no 3D render, no photograph. Scene: An unfinished doorway cut into darkness, a small luminous seed stepping toward it, and a single ribbon of possibility branching into many delicate paths. The image should feel curious, unguarded, and at the beginning of a journey.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252907772795.webp",
+      "output": "public/card-art/prompt.png",
+      "generated_at": "2026-07-28T15:35:14.934399+00:00",
+      "id": "prompt",
+      "rejected_at": "2026-07-28T15:37:10.777674+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "Full-bleed abstract allegorical copper engraving printed directly on edge-to-edge matte charcoal handmade paper. This is a borderless fine-art book illustration, not a card and not a poster. Strict ink palette only: charcoal black, bone ivory, muted ochre gold, one tiny rust-red accent, and a few muted sea-green lines. All colors are physical ink with no emitted light, no glow, no neon. Extremely fine engraved hatching, sparse worn metal leaf, tactile paper grain, crisp central symbol, and generous quiet dark negative space. Square 1024 composition designed to crop safely into a vertical 2:3 window: keep the main symbol inside the central 58 percent width and 82 percent height. No people, no person, no body, no face, no head, no portrait, no robot, no android, no machine character. No border, no frame, no parchment rectangle, no printed card, no ornamental corners. No readable text anywhere, no letters, no numbers, no runes, no glyphs, no fake writing, no logo, no signature, no watermark, no interface, no phone, no laptop, no screen, no chip, no purple, no violet, no magenta, no pink, no cyan glow, no cyberpunk, no crystal ball, no zodiac wheel, no anime, no 3D render, no photograph. Scene: An unfinished doorway cut into darkness, a small luminous seed stepping toward it, and a single ribbon of possibility branching into many delicate paths. The image should feel curious, unguarded, and at the beginning of a journey.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253034504879.webp",
+      "output": "public/card-art/prompt.png",
+      "generated_at": "2026-07-28T15:37:20.229499+00:00",
+      "id": "prompt",
+      "rejected_at": "2026-07-28T15:39:46.407248+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A full-bleed symbolic fine-art print from one coherent series, not a picture of a card. Non-figurative post-human illuminated manuscript made directly on edge-to-edge black vellum: extremely fine copperplate etching, sparse worn old-gold leaf, bone-ivory ink, one restrained vermilion accent, and a few cool-cyan topology threads. Tactile analog paper grain, crisp central symbol, quiet dark negative space, museum-quality editorial illustration. Square 1024 composition designed to crop safely into a vertical 2:3 window: keep the main symbol inside the central 58 percent width and 82 percent height. No people, no person, no body, no face, no head, no robot, no android, no machine character. No border, no frame, no parchment rectangle, no printed card, no ornamental corners. No readable text anywhere, no letters, no numbers, no runes, no glyphs, no fake writing, no logo, no watermark, no interface, no phone, no laptop, no microchip close-up, no purple neon, no cyberpunk, no crystal ball, no zodiac wheel, no anime, no 3D render, no photograph. Scene: Two different luminous trajectories approach, negotiate, and form one shared orbit around an open center; neither path disappears. Add subtle prismatic foil-like color potential while keeping the black vellum and gold manuscript style dominant.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252921509706.webp",
+      "output": "public/card-art/alignment.png",
+      "generated_at": "2026-07-28T15:35:25.621001+00:00",
+      "id": "alignment",
+      "rejected_at": "2026-07-28T15:41:31.004430+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A full-bleed symbolic fine-art print from one coherent series, not a picture of a card. Non-figurative post-human illuminated manuscript made directly on edge-to-edge black vellum: extremely fine copperplate etching, sparse worn old-gold leaf, bone-ivory ink, one restrained vermilion accent, and a few cool-cyan topology threads. Tactile analog paper grain, crisp central symbol, quiet dark negative space, museum-quality editorial illustration. Square 1024 composition designed to crop safely into a vertical 2:3 window: keep the main symbol inside the central 58 percent width and 82 percent height. No people, no person, no body, no face, no head, no robot, no android, no machine character. No border, no frame, no parchment rectangle, no printed card, no ornamental corners. No readable text anywhere, no letters, no numbers, no runes, no glyphs, no fake writing, no logo, no watermark, no interface, no phone, no laptop, no microchip close-up, no purple neon, no cyberpunk, no crystal ball, no zodiac wheel, no anime, no 3D render, no photograph. Scene: Many separate learning paths, relationships, tools and memories converge into a vast radiant neural mandorla around a human-scale empty center; integration at a threshold, awe without catastrophe. Strongest restrained prismatic potential in the series.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785252932572337.webp",
+      "output": "public/card-art/singularity.png",
+      "generated_at": "2026-07-28T15:35:37.286705+00:00",
+      "id": "singularity",
+      "rejected_at": "2026-07-28T15:41:45.750314+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    }
+  ]
+}

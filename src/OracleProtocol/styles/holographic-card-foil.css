@@ -1,0 +1,35 @@
+/* Adapted mechanism: CSS Holographic Masks by Christian Alder (MIT).
+ * Preserve the consuming game's THIRD_PARTY_NOTICES.txt entry. */
+.hcf-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hcf-card::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(108deg, transparent 12%, rgba(255,255,255,.32) 31%, transparent 40%),
+    linear-gradient(115deg, #ee4d90 7%, #f5d55a 26%, #52e4c9 45%, #4c8eff 64%, #bd5bea 82%, #ee4d90 100%);
+  background-position: 0% 50%, 0% 50%;
+  background-size: 240% 240%, 240% 240%;
+  mix-blend-mode: color-dodge;
+  opacity: var(--hcf-opacity, .58);
+  animation: op-hcf-sweep var(--hcf-duration, 3.8s) ease-in-out infinite alternate;
+}
+
+@keyframes op-hcf-sweep {
+  from { background-position: 0% 50%, 0% 50%; }
+  to { background-position: 100% 50%, 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hcf-card::after {
+    animation: none;
+    background-position: 42% 50%, 42% 50%;
+  }
+}

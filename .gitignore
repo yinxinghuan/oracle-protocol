@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+_qa/tmp
+_artifacts/card-art/rejected/
+_artifacts/card-art/*-download.img
+_artifacts/card-art/*-source.png

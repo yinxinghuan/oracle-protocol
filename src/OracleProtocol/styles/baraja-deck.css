@@ -1,0 +1,41 @@
+/*
+ * Base layout derived from Baraja v1.0.0 by Codrops.
+ * Copyright (c) 2012 Codrops. Licensed under the MIT License.
+ */
+
+.baraja-deck {
+  --baraja-card-width: min(52vw, 220px);
+  --baraja-card-ratio: 0.645;
+  position: relative;
+  width: var(--baraja-card-width);
+  height: calc(var(--baraja-card-width) / var(--baraja-card-ratio));
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  isolation: isolate;
+}
+
+.baraja-deck__card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  backface-visibility: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.baraja-deck__card img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .baraja-deck__card {
+    scroll-behavior: auto;
+  }
+}
