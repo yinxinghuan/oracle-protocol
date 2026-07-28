@@ -43,6 +43,18 @@ export interface BarajaOrbitPose {
   zIndex: number
 }
 
+export interface BarajaOrbitPath {
+  midX: number
+  midY: number
+  overshootX: number
+  overshootY: number
+  focusPullX: number
+  focusPullY: number
+  focusMidX: number
+  focusMidY: number
+  focusMidRotation: number
+}
+
 export const DEFAULT_BARAJA_FAN: Readonly<BarajaFanSettings> = {
   speed: 500,
   easing: 'ease-out',
@@ -154,6 +166,24 @@ export function computeBarajaOrbit(
       zIndex: 1000 + Math.round((Math.sin(radians) + 1) * 100) + rank,
     }
   })
+}
+
+export function computeBarajaOrbitPath(
+  pose: BarajaOrbitPose,
+  tangentOffset = 22,
+): BarajaOrbitPath {
+  const radians = pose.angle * Math.PI / 180
+  return {
+    midX: pose.translateX * .58 - Math.sin(radians) * tangentOffset,
+    midY: pose.translateY * .58 + Math.cos(radians) * tangentOffset,
+    overshootX: pose.translateX * 1.045,
+    overshootY: pose.translateY * 1.045,
+    focusPullX: pose.translateX * 1.1,
+    focusPullY: pose.translateY * 1.1,
+    focusMidX: pose.translateX * .42,
+    focusMidY: pose.translateY * .42,
+    focusMidRotation: pose.rotation * .38,
+  }
 }
 
 export function createBarajaSeededRandom(seed: number): () => number {

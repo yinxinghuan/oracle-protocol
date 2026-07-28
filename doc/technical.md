@@ -4,11 +4,11 @@
 
 - React 18 + TypeScript，Vite 5 构建，`base: './'`，输出 `dist/`。
 - Less 负责响应式布局、圆环、聚焦、翻牌、分页过渡和粒子。
-- `computeBarajaOrbit()` 将 Codrops Baraja 的“显式卡序 → 每牌变换与层级”机制扩展为 360° 椭圆牌阵。
+- `computeBarajaOrbit()` 将 Codrops Baraja 的“显式卡序 → 每牌变换与层级”机制扩展为 360° 正圆牌冠；`computeBarajaOrbitPath()` 为每张牌计算切线弧段与越位回落路径。
 - CSS Holographic Masks 改造层只用于当前特殊主卡，使用 `mix-blend-mode: color-dodge`。
 - Web Audio API 合成反馈音；所有创建与播放异常静默降级。
 - Aigram `callAigramAPI()` 获取玩家 `name` 与 `head_url` 资料；资料失败不阻塞。
-- 卡面与卡背为制作期通过 Aigram transit 绘图接口生成并编码的 WebP。
+- 卡面与卡背为制作期通过 Aigram transit 绘图接口生成并编码的 WebP；卡背以公开的 AlterU Logo 栅格参考图作为 `ref_url`。
 
 第三方来源与 MIT 声明在 `public/THIRD_PARTY_NOTICES.txt`，构建后同步进入 `dist/`。
 
@@ -20,6 +20,7 @@ oracle-protocol/
 ├── _production/                        # 卡图生成、编码与海报制作脚本
 ├── _qa/
 │   ├── capture-v2.mjs                  # V2 全流程双尺寸浏览器 QA
+│   ├── capture-orbit-motion.mjs        # 展牌过程六帧时序 QA
 │   └── ui/                             # platform-layout / external-guest 证据
 ├── doc/
 │   ├── requirements.md                 # V2 玩法蓝图
@@ -29,6 +30,7 @@ oracle-protocol/
 │   └── technical.md                    # 本文档
 ├── public/
 │   ├── card-art/*.webp                 # 12 张牌面与卡背
+│   ├── alteru-mark-reference.png       # 卡背制作期公开 Logo 参考图
 │   ├── poster.png
 │   └── THIRD_PARTY_NOTICES.txt
 └── src/
@@ -57,11 +59,20 @@ oracle-protocol/
 - `meaning`：显示 2–3 行解释和一条行动建议。
 - `reading`：`readingPage` 在 0–3 之间切换，分别显示过去、当下、下一步与今日提示。
 
-`actionLockRef` 在同一事件循环中同步阻止重复输入；所有关键解锁使用有上限的 `setTimeout`，不依赖 `animation.finished` 或 `transitionend`。
+`actionLockRef` 在同一事件循环中同步阻止重复输入；初始 12 张展开与抽牌后的
+11/10 张重排均等待最后一张牌完成 760 ms 动画与 42 ms 错峰后再解锁。所有
+关键解锁使用有上限的 `setTimeout`，不依赖 `animation.finished` 或
+`transitionend`。
 
 ### 圆环布局
 
-`computeBarajaOrbit(count, settings)` 按卡序计算角度、`translateX/Y`、朝向圆心的旋转和 z-index。主组件根据 `innerWidth / innerHeight` 选择 `103×126` 或 `138×178` 半径。CSS 变量将姿态交给每个卡牌按钮，保持可访问按钮语义。
+`computeBarajaOrbit(count, settings)` 按卡序计算角度、`translateX/Y`、朝向圆心的
+旋转和 z-index。主组件根据 `innerWidth / innerHeight` 选择 101、110 或
+130 px 的等轴半径，形成真实正圆；卡宽按短屏/常规屏采用 70/82 px，使相邻牌
+产生明显叠压。`computeBarajaOrbitPath()` 进一步给出切线中点、径向越位点与
+聚焦中点。CSS 变量把这些姿态交给每个卡牌按钮：牌从中央牌堆离开，经切线弧段、
+4.5% 越位后落位；选中时先向外抽出 10%，再旋正飞向中央。抽走一张后的剩余牌
+使用新序列重新完成同一过程，而不是瞬移补位。
 
 ### 白话解读
 
@@ -75,7 +86,11 @@ oracle-protocol/
 
 ### 视觉、响应式与无障碍
 
-卡面固定 2:3；圆环和中央主卡使用响应式尺寸。390×844 与 320×568 有独立半径、主卡和排版规则。功能图标为同一套 SVG，按钮最小 44×44 px，圆环每张牌为真实按钮并有 `aria-label`。`prefers-reduced-motion` 下直接到达相同布局终态。
+实体卡固定 2:3，但生成图始终放入严格 1:1 的中央插画窗，不再拉伸或裁成卡片
+比例；编号与牌义分别使用上下框区。卡背也以 1:1 Logo 纹章置于统一 2:3 外框。
+圆环和中央主卡使用响应式尺寸。390×844 与 320×568 有独立半径、主卡和排版
+规则。功能图标为同一套 SVG，按钮最小 44×44 px，圆环每张牌为真实按钮并有
+`aria-label`。`prefers-reduced-motion` 下直接到达相同布局终态。
 
 ### 音频与平台
 
@@ -83,7 +98,8 @@ oracle-protocol/
 
 ## 4. 扩展点
 
-- 调整圆环半径、旋转或层级：`src/OracleProtocol/lib/baraja-layout.ts` 与 `OracleProtocol.tsx` 的 orbit settings。
+- 调整圆环半径、旋转、路径或层级：`src/OracleProtocol/lib/baraja-layout.ts`、`OracleProtocol.tsx` 的 orbit settings 与 `OracleProtocol.less` 的 `op-orbit-arrive`。
+- 重新生成 Logo 卡背：更新 `public/alteru-mark-reference.png`，运行 `_production/generate_card_art.py --ids card-back --force --no-anchor`，再运行 `_production/encode_card_art.mjs`。
 - 修改页面顺序或抽牌规则：`OracleProtocol.tsx` 的阶段处理函数。
 - 改白话解读与今日行动：`data/plain-readings.ts`。
 - 改经典牌义、反思问题或新增牌：`data/cards.ts`，并在 `public/card-art/` 添加图片。

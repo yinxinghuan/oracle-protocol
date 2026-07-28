@@ -7,7 +7,7 @@ import {
 } from 'react'
 import { TAROT_CARDS } from './data/cards'
 import { getPlainReading } from './data/plain-readings'
-import { computeBarajaOrbit } from './lib/baraja-layout'
+import { computeBarajaOrbit, computeBarajaOrbitPath } from './lib/baraja-layout'
 import type { DrawnCard, GamePhase, Locale, Position, TarotCard } from './types'
 import { useI18n } from './i18n'
 import { usePlayerName } from './hooks/usePlayerName'
@@ -19,6 +19,12 @@ import './styles/holographic-card-foil.css'
 import './OracleProtocol.less'
 
 const POSITIONS: Position[] = ['past', 'present', 'future']
+const ORBIT_CARD_DURATION = 760
+const ORBIT_CARD_STAGGER = 42
+
+function orbitSettleTime(count: number) {
+  return ORBIT_CARD_DURATION + Math.max(0, count - 1) * ORBIT_CARD_STAGGER
+}
 
 function assetUrl(file: string) {
   return new URL(`./card-art/${file}`, document.baseURI).href
@@ -109,14 +115,17 @@ function CardBack({ label }: { label: string }) {
   return (
     <div className="op-card-back" aria-label={label}>
       {!failed && (
-        <img
-          src={assetUrl('card-back.webp')}
-          alt=""
-          draggable={false}
-          onError={() => setFailed(true)}
-        />
+        <div className="op-card-back__art">
+          <img
+            src={assetUrl('card-back.webp')}
+            alt=""
+            draggable={false}
+            onError={() => setFailed(true)}
+          />
+        </div>
       )}
-      <div className="op-card-back__sigil" aria-hidden="true"><span /><i /><b /></div>
+      <div className="op-card-back__rails" aria-hidden="true"><i /><b /></div>
+      {failed && <div className="op-card-back__sigil" aria-hidden="true"><span /><i /><b /></div>}
     </div>
   )
 }
@@ -148,8 +157,8 @@ export default function OracleProtocol() {
     const short = viewport.height <= 640
     const narrow = viewport.width <= 340
     return computeBarajaOrbit(remaining.length, {
-      radiusX: narrow ? 103 : 138,
-      radiusY: short ? 126 : 178,
+      radiusX: narrow ? 101 : short ? 110 : 130,
+      radiusY: narrow ? 101 : short ? 110 : 130,
       startAngle: -90,
       faceCenter: true,
     })
@@ -174,8 +183,10 @@ export default function OracleProtocol() {
     sounds.shuffle()
     window.setTimeout(() => {
       setPhase('choosing')
-      setLocked(false)
-      actionLockRef.current = false
+      window.setTimeout(() => {
+        setLocked(false)
+        actionLockRef.current = false
+      }, isReducedMotion() ? 120 : orbitSettleTime(TAROT_CARDS.length))
     }, isReducedMotion() ? 120 : 560)
   }, [])
 
@@ -229,21 +240,26 @@ export default function OracleProtocol() {
     actionLockRef.current = true
     setLocked(true)
     const isFinal = drawn.length === 2
+    const nextOrbitCount = remaining.length - 1
     setDrawn((current) => [...current, candidate])
     setRemaining((current) => current.filter((card) => card.id !== candidate.card.id))
     sounds.complete()
     window.setTimeout(() => {
       setCandidate(null)
-      setLocked(false)
-      actionLockRef.current = false
       if (isFinal) {
+        setLocked(false)
+        actionLockRef.current = false
         setReadingPage(0)
         setPhase('reading')
       } else {
         setPhase('choosing')
+        window.setTimeout(() => {
+          setLocked(false)
+          actionLockRef.current = false
+        }, isReducedMotion() ? 120 : orbitSettleTime(nextOrbitCount))
       }
     }, isReducedMotion() ? 100 : 360)
-  }, [candidate, drawn.length, locked])
+  }, [candidate, drawn.length, locked, remaining.length])
 
   const activeReading = readingPage < 3 ? drawn[readingPage] : null
   const activePlain = activeReading
@@ -295,12 +311,13 @@ export default function OracleProtocol() {
       <div className="op-orbit__track" aria-hidden="true" />
       {remaining.map((card, index) => {
         const pose = orbit[index]
+        const path = computeBarajaOrbitPath(pose)
         const selected = candidate?.card.id === card.id
         return (
           <button
             className={`op-orbit__card ${selected ? 'is-selected' : ''}`}
             type="button"
-            key={card.id}
+            key={`${drawn.length}-${card.id}`}
             data-card-id={card.id}
             aria-label={t('chooseCard', { n: index + 1 })}
             disabled={phase !== 'choosing' || locked}
@@ -308,8 +325,12 @@ export default function OracleProtocol() {
             style={{
               '--orbit-x': `${pose.translateX}px`,
               '--orbit-y': `${pose.translateY}px`,
+              '--orbit-mid-x': `${path.midX}px`,
+              '--orbit-mid-y': `${path.midY}px`,
+              '--orbit-over-x': `${path.overshootX}px`,
+              '--orbit-over-y': `${path.overshootY}px`,
               '--orbit-rotation': `${pose.rotation}deg`,
-              '--orbit-delay': `${index * 18}ms`,
+              '--orbit-delay': `${index * ORBIT_CARD_STAGGER}ms`,
               zIndex: pose.zIndex,
             } as React.CSSProperties}
           >
@@ -385,11 +406,26 @@ export default function OracleProtocol() {
             {orbitCards}
             <div
               className="op-hero-card op-hero-card--back"
-              style={{
-                '--focus-from-x': `${candidatePose?.translateX ?? 0}px`,
-                '--focus-from-y': `${candidatePose?.translateY ?? 0}px`,
-                '--focus-from-rotation': `${candidatePose?.rotation ?? 0}deg`,
-              } as React.CSSProperties}
+              style={(() => {
+                const pose = candidatePose ?? {
+                  translateX: 0,
+                  translateY: 0,
+                  rotation: 0,
+                  angle: 0,
+                  zIndex: 0,
+                }
+                const path = computeBarajaOrbitPath(pose)
+                return {
+                  '--focus-from-x': `${pose.translateX}px`,
+                  '--focus-from-y': `${pose.translateY}px`,
+                  '--focus-pull-x': `${path.focusPullX}px`,
+                  '--focus-pull-y': `${path.focusPullY}px`,
+                  '--focus-mid-x': `${path.focusMidX}px`,
+                  '--focus-mid-y': `${path.focusMidY}px`,
+                  '--focus-from-rotation': `${pose.rotation}deg`,
+                  '--focus-mid-rotation': `${path.focusMidRotation}deg`,
+                } as React.CSSProperties
+              })()}
             >
               <CardBack label={t('focusTitle')} />
             </div>

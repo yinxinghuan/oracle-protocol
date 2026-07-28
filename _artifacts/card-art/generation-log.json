@@ -86,19 +86,19 @@
       "output": "public/card-art/hallucination.png",
       "generated_at": "2026-07-28T15:45:25.446206+00:00"
     },
-    "card-back": {
-      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A perfectly symmetrical tarot card back artwork: a central neural star map, a double-loop serpentine circuit, four old-gold corner nodes, nested bone-white orbital rings, and quiet black vellum. No scene, no front-card meaning, strict vertical symmetry.",
-      "ref_url": null,
-      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253532034741.webp",
-      "output": "public/card-art/card-back.png",
-      "generated_at": "2026-07-28T15:45:36.316351+00:00"
-    },
     "poster-scene": {
       "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A narrative poster scene: an anonymous contemporary seeker seen from behind in a dark manuscript chamber, facing three large floating tarot cards whose gold-etched symbols form one neural constellation. The middle card releases a restrained prismatic beam. Reserve the top 25 percent as quiet dark space for a title; keep faces and key symbols away from the bottom 20 percent.",
       "ref_url": null,
       "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253542605522.webp",
       "output": "public/card-art/poster-scene.png",
       "generated_at": "2026-07-28T15:45:46.850431+00:00"
+    },
+    "card-back": {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A perfectly symmetrical square tarot card-back medallion built around the exact recognizable silhouette of the AlterU mark from the reference. Preserve the mark's two-part calligraphic shape and proportions, but render it as an embossed bone-ivory sigil in the center—not as text and not as a generic letter. Surround it with tightly nested old-gold orbital rings, twelve small brass nodes, restrained sea-green neural filaments, and black vellum negative space. Front-facing, centered, premium engraved print, strict four-way balance, no words, no letters, no scene, no mockup, no card border outside the square artwork. The reference is the required AlterU brand mark. Keep its silhouette recognizable and central while translating only its material into engraved bone ivory and old gold.",
+      "ref_url": "https://raw.githubusercontent.com/yinxinghuan/oracle-protocol/master/public/alteru-mark-reference.png",
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785271449581451.webp",
+      "output": "_artifacts/card-art/originals/card-back.png",
+      "generated_at": "2026-07-28T20:44:19.260886+00:00"
     }
   },
   "rejected": [
@@ -170,6 +170,16 @@
       "generated_at": "2026-07-28T15:35:37.286705+00:00",
       "id": "singularity",
       "rejected_at": "2026-07-28T15:41:45.750314+00:00",
+      "reason": "Manual visual QA rejection before force regeneration."
+    },
+    {
+      "prompt": "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. The picture fills the entire square sheet. Its material language is an old naturalist folio: hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height so the square illustration can be cropped into a tall window. Scene: A perfectly symmetrical tarot card back artwork: a central neural star map, a double-loop serpentine circuit, four old-gold corner nodes, nested bone-white orbital rings, and quiet black vellum. No scene, no front-card meaning, strict vertical symmetry.",
+      "ref_url": null,
+      "url": "https://cdn.aiwaves.tech/prod/telegram/avatar/0/1785253532034741.webp",
+      "output": "public/card-art/card-back.png",
+      "generated_at": "2026-07-28T15:45:36.316351+00:00",
+      "id": "card-back",
+      "rejected_at": "2026-07-28T20:40:15.365551+00:00",
       "reason": "Manual visual QA rejection before force regeneration."
     }
   ]

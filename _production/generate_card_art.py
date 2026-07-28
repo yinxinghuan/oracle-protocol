@@ -21,6 +21,10 @@ SOURCE_DIR = ARTIFACT_DIR / "originals"
 LOG_PATH = ARTIFACT_DIR / "generation-log.json"
 ENDPOINT = "https://chat.aiwaves.tech/aigram/api/gen-image"
 ORIGIN = "https://aigram.app"
+ALTERU_MARK_REF_URL = (
+    "https://raw.githubusercontent.com/yinxinghuan/oracle-protocol/"
+    "master/public/alteru-mark-reference.png"
+)
 
 STYLE = (
     "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. "
@@ -86,9 +90,13 @@ SCENES = {
         "catastrophe or a central character."
     ),
     "card-back": (
-        "A perfectly symmetrical tarot card back artwork: a central neural star map, a double-loop "
-        "serpentine circuit, four old-gold corner nodes, nested bone-white orbital rings, and quiet black "
-        "vellum. No scene, no front-card meaning, strict vertical symmetry."
+        "A perfectly symmetrical square tarot card-back medallion built around the exact recognizable "
+        "silhouette of the AlterU mark from the reference. Preserve the mark's two-part calligraphic "
+        "shape and proportions, but render it as an embossed bone-ivory sigil in the center—not as text "
+        "and not as a generic letter. Surround it with tightly nested old-gold orbital rings, twelve "
+        "small brass nodes, restrained sea-green neural filaments, and black vellum negative space. "
+        "Front-facing, centered, premium engraved print, strict four-way balance, no words, no letters, "
+        "no scene, no mockup, no card border outside the square artwork."
     ),
     "poster-scene": (
         "A narrative poster scene: an anonymous contemporary seeker seen from behind in a dark manuscript "
@@ -232,9 +240,18 @@ def generate(item_ids: list[str], use_anchor: bool, force: bool) -> None:
 
         if index > 0:
             time.sleep(3)
-        reference = anchor_url if use_anchor and item_id != "prompt" else None
+        reference = (
+            ALTERU_MARK_REF_URL
+            if item_id == "card-back"
+            else anchor_url if use_anchor and item_id != "prompt" else None
+        )
         prompt = f"{STYLE} Scene: {SCENES[item_id]}"
-        if reference:
+        if reference and item_id == "card-back":
+            prompt += (
+                " The reference is the required AlterU brand mark. Keep its silhouette recognizable "
+                "and central while translating only its material into engraved bone ivory and old gold."
+            )
+        elif reference:
             prompt += (
                 " Use the reference only for material, palette, line density, and series identity. "
                 "Replace its subject and composition completely with the requested scene."
