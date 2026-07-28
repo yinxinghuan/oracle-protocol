@@ -2,6 +2,8 @@
 
 AI 主题三张牌塔罗体验。卡面与海报使用 Aigram 平台 transit 绘图接口生成。
 
+在线体验：https://yinxinghuan.github.io/oracle-protocol/
+
 卡堆交互改编自 Codrops / Manoela Ilic 的 Baraja v1.0.0（MIT）：
 https://tympanus.net/Development/Baraja/
 
