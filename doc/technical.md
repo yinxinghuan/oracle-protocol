@@ -63,6 +63,11 @@ oracle-protocol/
 - `meaning`：显示 2–3 行解释和一条行动建议。
 - `reading`：`readingPage` 在 0–3 之间切换，分别显示过去、当下、下一步与今日提示。
 
+`meaning` 的解释正文由 `.op-single__meaning-scroll` 独立承载，确认按钮是其
+同级固定操作；`reading` 的正文由 `.op-reading-page__content` 独立承载，
+分页导航同样留在滚动区外。两处使用原生 `overflow-y: auto`、`touch-action:
+pan-y` 与 iOS 惯性滚动，保证英文长文案和低于 640 px 的平台可用高度仍可读完。
+
 `actionLockRef` 在同一事件循环中同步阻止重复输入；初始 12 张展开与抽牌后的
 11/10 张重排均等待最后一张牌完成 760 ms 动画与 42 ms 错峰后再解锁。所有
 关键解锁使用有上限的 `setTimeout`，不依赖 `animation.finished` 或
@@ -94,8 +99,10 @@ oracle-protocol/
 比例；编号与牌义分别使用上下框区。卡背也以 1:1 Logo 纹章置于统一 2:3 外框。
 `encode_card_art.mjs` 会识别 transit 原图外侧的浅色装裱区，取内部暗色正方形，
 再统一编码；内置 imagegen 的全幅黑底图只做 3 px 安全内裁。圆环和中央主卡
-使用响应式尺寸；聚焦卡最大 258 px，短屏为 186 px。390×844 与 320×568 有独立半径、主卡和排版
-规则。功能图标为同一套 SVG，按钮最小 44×44 px，圆环每张牌为真实按钮并有
+使用响应式尺寸；聚焦卡最大 258 px，短屏为 186 px。根容器严格服从
+`100dvh`，不再用大于实际视口的 `min-height` 撑开不可滚动页面。390×844 与
+320×568 有独立半径、主卡和排版规则。功能图标为同一套 SVG，按钮最小
+44×44 px，圆环每张牌为真实按钮并有
 `aria-label`。`prefers-reduced-motion` 下直接到达相同布局终态。
 
 ### 音频与平台
@@ -114,6 +121,8 @@ oracle-protocol/
 - 改白话解读与今日行动：`data/plain-readings.ts`。
 - 改经典牌义、反思问题或新增牌：`data/cards.ts`，并在 `public/card-art/` 添加图片。
 - 调整色彩、字号、主卡尺寸、全息强度和短屏布局：`OracleProtocol.less`。
+- 调整英文长文案滚动区与固定操作栏：`OracleProtocol.tsx` 的 `meaning-scroll` /
+  `reading-page__content` 结构，以及 `OracleProtocol.less` 的同名规则。
 - 修改 zh/en 界面按钮：`i18n/index.ts`。
 - 新增声音：`utils/audio.ts`，保持异常不阻塞状态机。
 - 发布元数据：根目录 `meta.json`、`README.md`、`public/poster.png` 和 games 仓库条目。

@@ -10,7 +10,7 @@
   position: relative;
   width: min(100vw, 520px);
   height: 100dvh;
-  min-height: 520px;
+  min-height: 0;
   margin: 0 auto;
   overflow: hidden;
   background:
@@ -613,6 +613,11 @@
   align-items: center;
   padding: max(106px, calc(env(safe-area-inset-top) + 100px)) 18px max(18px, env(safe-area-inset-bottom));
 
+  &--meaning {
+    overflow: hidden;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
   &__card {
     position: relative;
     z-index: 10;
@@ -635,12 +640,30 @@
   }
 
   &__meaning {
+    flex: 1 1 auto;
+    min-height: 0;
     width: min(410px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-top: 15px;
     text-align: center;
     animation: op-copy-rise 280ms ease both;
 
-    > p {
+    &-scroll {
+      width: 100%;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      padding: 0 2px 8px;
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar { display: none; }
+    }
+
+    &-scroll > p {
       margin: 0;
       color: rgba(238, 232, 216, .84);
       font-size: 17px;
@@ -667,6 +690,11 @@
         font-size: 16px;
         line-height: 1.45;
       }
+    }
+
+    > .op-button {
+      flex: 0 0 auto;
+      margin-top: 2px;
     }
   }
 }
@@ -829,8 +857,25 @@
   align-items: center;
   padding: max(72px, calc(env(safe-area-inset-top) + 66px)) 18px max(18px, env(safe-area-inset-bottom));
   text-align: center;
+  overflow: hidden;
 
-  > header {
+  &__content {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  &__content > header {
     width: 100%;
     margin-top: 10px;
 
@@ -918,6 +963,7 @@
   }
 
   &__nav {
+    flex: 0 0 auto;
     width: min(410px, 100%);
     min-height: 50px;
     display: flex;
@@ -1003,7 +1049,7 @@
     &__reveal-copy { margin-top: 9px; h1 { margin: 4px 0 8px; font-size: 21px; } }
     &__meaning {
       margin-top: 8px;
-      > p { font-size: 16px; line-height: 1.42; }
+      &-scroll > p { font-size: 16px; line-height: 1.42; }
       aside { margin: 7px 0; padding: 7px 10px; strong { font-size: 16px; } }
       .op-button { min-height: 44px; }
     }
@@ -1011,7 +1057,7 @@
 
   .op-reading-page {
     padding-top: 59px;
-    > header { margin-top: 2px; h1 { margin-top: 4px; font-size: 19px; } }
+    &__content > header { margin-top: 2px; h1 { margin-top: 4px; font-size: 19px; } }
     &__card { width: 104px; margin: 8px 0; }
     &__copy {
       > p { font-size: 16px; line-height: 1.43; }

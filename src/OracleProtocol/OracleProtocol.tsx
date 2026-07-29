@@ -342,7 +342,7 @@ export default function OracleProtocol() {
   )
 
   return (
-    <main className={`op op--${phase}`}>
+    <main className={`op op--${phase}`} lang={locale === 'zh' ? 'zh-CN' : 'en'}>
       <div className="op__ambient" aria-hidden="true">
         {Array.from({ length: 18 }, (_, index) => (
           <i key={index} style={{
@@ -458,11 +458,13 @@ export default function OracleProtocol() {
             </div>
           ) : (
             <div className="op-single__meaning">
-              <p>{getPlainReading(candidate.card.id, candidate.reversed).message[locale]}</p>
-              <aside>
-                <span>{t('todayAction')}</span>
-                <strong>{getPlainReading(candidate.card.id, candidate.reversed).action[locale]}</strong>
-              </aside>
+              <div className="op-single__meaning-scroll">
+                <p>{getPlainReading(candidate.card.id, candidate.reversed).message[locale]}</p>
+                <aside>
+                  <span>{t('todayAction')}</span>
+                  <strong>{getPlainReading(candidate.card.id, candidate.reversed).action[locale]}</strong>
+                </aside>
+              </div>
               <button className="op-button op-button--primary" type="button" disabled={locked} onPointerDown={acceptCard}>
                 <SparkIcon />
                 <span>{drawn.length === 2 ? t('openReading') : t('nextCard')}</span>
@@ -475,31 +477,33 @@ export default function OracleProtocol() {
       {phase === 'reading' && drawn.length === 3 && (
         <section className="op-reading-page">
           <p className="op__eyebrow">{t('pageProgress', { n: readingPage + 1 })}</p>
-          {readingPage < 3 && activeReading && activePlain ? (
-            <>
-              <header>
-                <span>{positionLabel(POSITIONS[readingPage], locale)}</span>
-                <h1>{activePlain.headline[locale]}</h1>
-              </header>
-              <div className="op-reading-page__card"><CardFace drawn={activeReading} locale={locale} compact /></div>
-              <div className="op-reading-page__copy">
-                <p>{activePlain.message[locale]}</p>
-                <aside><span>{t('question')}</span><strong>{(activeReading.reversed ? activeReading.card.reversed : activeReading.card.upright).reflection[locale]}</strong></aside>
+          <div className="op-reading-page__content">
+            {readingPage < 3 && activeReading && activePlain ? (
+              <>
+                <header>
+                  <span>{positionLabel(POSITIONS[readingPage], locale)}</span>
+                  <h1>{activePlain.headline[locale]}</h1>
+                </header>
+                <div className="op-reading-page__card"><CardFace drawn={activeReading} locale={locale} compact /></div>
+                <div className="op-reading-page__copy">
+                  <p>{activePlain.message[locale]}</p>
+                  <aside><span>{t('question')}</span><strong>{(activeReading.reversed ? activeReading.card.reversed : activeReading.card.upright).reflection[locale]}</strong></aside>
+                </div>
+              </>
+            ) : (
+              <div className="op-reading-page__today">
+                <div className="op-reading-page__seal"><SparkIcon /></div>
+                <span>{t('today')}</span>
+                <h1>{t('todayLead')}</h1>
+                <p>{summary}</p>
+                <aside>
+                  <span>{t('todayAction')}</span>
+                  <strong>{getPlainReading(drawn[2].card.id, drawn[2].reversed).action[locale]}</strong>
+                </aside>
+                <p className="op__disclaimer">{t('disclaimer')}</p>
               </div>
-            </>
-          ) : (
-            <div className="op-reading-page__today">
-              <div className="op-reading-page__seal"><SparkIcon /></div>
-              <span>{t('today')}</span>
-              <h1>{t('todayLead')}</h1>
-              <p>{summary}</p>
-              <aside>
-                <span>{t('todayAction')}</span>
-                <strong>{getPlainReading(drawn[2].card.id, drawn[2].reversed).action[locale]}</strong>
-              </aside>
-              <p className="op__disclaimer">{t('disclaimer')}</p>
-            </div>
-          )}
+            )}
+          </div>
           <nav className="op-reading-page__nav">
             {readingPage > 0 && <button className="op-button op-button--text" type="button" onClick={() => setReadingPage((page) => page - 1)}>{t('previous')}</button>}
             {readingPage < 3 ? (
