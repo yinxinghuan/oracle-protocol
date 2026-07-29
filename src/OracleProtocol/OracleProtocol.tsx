@@ -157,8 +157,8 @@ export default function OracleProtocol() {
     const short = viewport.height <= 640
     const narrow = viewport.width <= 340
     return computeBarajaOrbit(remaining.length, {
-      radiusX: narrow ? 101 : short ? 110 : 130,
-      radiusY: narrow ? 101 : short ? 110 : 130,
+      radiusX: narrow ? 88 : short ? 100 : 116,
+      radiusY: narrow ? 88 : short ? 100 : 116,
       startAngle: -90,
       faceCenter: true,
     })

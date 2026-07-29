@@ -25,15 +25,23 @@ ALTERU_MARK_REF_URL = (
     "https://raw.githubusercontent.com/yinxinghuan/oracle-protocol/"
     "master/public/alteru-mark-reference.png"
 )
+SERIES_MATERIAL_REF_URL = (
+    "https://yinxinghuan.github.io/oracle-protocol/card-art/card-back.webp"
+)
 
 STYLE = (
-    "A full-bleed allegorical copper engraving printed directly on matte charcoal handmade paper. "
-    "The picture fills the entire square sheet. Its material language is an old naturalist folio: "
-    "hairline burin marks, cross-hatched shadows, dry ink, worn brass leaf, deckled paper fibres, and "
-    "large fields of velvety black. Use only charcoal black, bone ivory, muted ochre, oxidized copper, "
-    "and a trace of sea-green verdigris. The composition is sparse, solemn, tactile, and materially "
-    "printed. Keep one crisp symbolic subject inside the central 58 percent width and 82 percent height "
-    "so the square illustration can be cropped into a tall window."
+    "FULL-BLEED SQUARE BLACK BACKGROUND, black from edge to edge. One clear allegorical scene rendered "
+    "as flat two-dimensional monoline drawing. Use consistent fine irregular contours in antique gold, "
+    "oxidized copper, bone ivory, and dim sea-green; sparse narrow cross-hatching; large calm black "
+    "negative space; almost no filled areas. The image should feel drawn by one vintage technical-pen "
+    "illustrator directly into darkness. Show ONLY the objects explicitly requested in the Scene and "
+    "do not invent any additional symbol, character, ornament, icon, or secondary vignette. Compose "
+    "the requested scene naturally across the central 76 percent; it must not become an emblem, badge, "
+    "mandala, icon, collage, or symmetrical medallion. Every object remains a simple graphic outline, "
+    "never realistic or volumetric. No realistic skin, photography, 3D, modelling, bevel, cast shadow, "
+    "gloss, thick rope, skull, large white filled shape, geometric frame, decorative border, card, poster, "
+    "plaque, margin, paper, caption, signature, artist mark, letters, numbers, logo, corner icon, robot, "
+    "purple neon, mockup, or UI."
 )
 
 SCENES = {
@@ -243,7 +251,11 @@ def generate(item_ids: list[str], use_anchor: bool, force: bool) -> None:
         reference = (
             ALTERU_MARK_REF_URL
             if item_id == "card-back"
-            else anchor_url if use_anchor and item_id != "prompt" else None
+            else SERIES_MATERIAL_REF_URL
+            if item_id == "prompt" and use_anchor
+            else anchor_url
+            if use_anchor
+            else None
         )
         prompt = f"{STYLE} Scene: {SCENES[item_id]}"
         if reference and item_id == "card-back":
@@ -253,8 +265,9 @@ def generate(item_ids: list[str], use_anchor: bool, force: bool) -> None:
             )
         elif reference:
             prompt += (
-                " Use the reference only for material, palette, line density, and series identity. "
-                "Replace its subject and composition completely with the requested scene."
+                " Use the reference only for its charcoal-black material, restrained gold/cyan palette, "
+                "line density, and series identity. Replace its symbol and composition completely with "
+                "the requested scene. Do not copy its logo, rings, medallion, or border."
             )
         print(f"[generate] {item_id} ref={'yes' if reference else 'no'}", flush=True)
         url = request_image(prompt, reference)

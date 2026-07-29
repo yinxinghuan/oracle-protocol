@@ -8,7 +8,10 @@
 - CSS Holographic Masks 改造层只用于当前特殊主卡，使用 `mix-blend-mode: color-dodge`。
 - Web Audio API 合成反馈音；所有创建与播放异常静默降级。
 - Aigram `callAigramAPI()` 获取玩家 `name` 与 `head_url` 资料；资料失败不阻塞。
-- 卡面与卡背为制作期通过 Aigram transit 绘图接口生成并编码的 WebP；卡背以公开的 AlterU Logo 栅格参考图作为 `ref_url`。
+- 卡背通过 Aigram transit 生成，并以公开的 AlterU Logo 栅格参考图作为
+  `ref_url`。正面先以 transit 产出暗底候选，用户圈选其中 5 张作为系列参考；
+  其余 7 张因 transit 持续产生写实/徽章漂移，改由内置 `imagegen` 多参考
+  模式逐张重制。最终均编码为 1024×1024 WebP。
 
 第三方来源与 MIT 声明在 `public/THIRD_PARTY_NOTICES.txt`，构建后同步进入 `dist/`。
 
@@ -21,6 +24,7 @@ oracle-protocol/
 ├── _qa/
 │   ├── capture-v2.mjs                  # V2 全流程双尺寸浏览器 QA
 │   ├── capture-orbit-motion.mjs        # 展牌过程六帧时序 QA
+│   ├── build-card-contact-sheet.mjs    # 12 张牌面系列一致性接触表
 │   └── ui/                             # platform-layout / external-guest 证据
 ├── doc/
 │   ├── requirements.md                 # V2 玩法蓝图
@@ -67,9 +71,9 @@ oracle-protocol/
 ### 圆环布局
 
 `computeBarajaOrbit(count, settings)` 按卡序计算角度、`translateX/Y`、朝向圆心的
-旋转和 z-index。主组件根据 `innerWidth / innerHeight` 选择 101、110 或
-130 px 的等轴半径，形成真实正圆；卡宽按短屏/常规屏采用 70/82 px，使相邻牌
-产生明显叠压。`computeBarajaOrbitPath()` 进一步给出切线中点、径向越位点与
+旋转和 z-index。主组件根据 `innerWidth / innerHeight` 选择 88、100 或
+116 px 的等轴半径，形成真实正圆；卡宽按短屏/常规屏采用 82/94 px，使相邻牌
+产生 36%–44% 的明显叠压。`computeBarajaOrbitPath()` 进一步给出切线中点、径向越位点与
 聚焦中点。CSS 变量把这些姿态交给每个卡牌按钮：牌从中央牌堆离开，经切线弧段、
 4.5% 越位后落位；选中时先向外抽出 10%，再旋正飞向中央。抽走一张后的剩余牌
 使用新序列重新完成同一过程，而不是瞬移补位。
@@ -88,7 +92,9 @@ oracle-protocol/
 
 实体卡固定 2:3，但生成图始终放入严格 1:1 的中央插画窗，不再拉伸或裁成卡片
 比例；编号与牌义分别使用上下框区。卡背也以 1:1 Logo 纹章置于统一 2:3 外框。
-圆环和中央主卡使用响应式尺寸。390×844 与 320×568 有独立半径、主卡和排版
+`encode_card_art.mjs` 会识别 transit 原图外侧的浅色装裱区，取内部暗色正方形，
+再统一编码；内置 imagegen 的全幅黑底图只做 3 px 安全内裁。圆环和中央主卡
+使用响应式尺寸；聚焦卡最大 258 px，短屏为 186 px。390×844 与 320×568 有独立半径、主卡和排版
 规则。功能图标为同一套 SVG，按钮最小 44×44 px，圆环每张牌为真实按钮并有
 `aria-label`。`prefers-reduced-motion` 下直接到达相同布局终态。
 
@@ -100,6 +106,10 @@ oracle-protocol/
 
 - 调整圆环半径、旋转、路径或层级：`src/OracleProtocol/lib/baraja-layout.ts`、`OracleProtocol.tsx` 的 orbit settings 与 `OracleProtocol.less` 的 `op-orbit-arrive`。
 - 重新生成 Logo 卡背：更新 `public/alteru-mark-reference.png`，运行 `_production/generate_card_art.py --ids card-back --force --no-anchor`，再运行 `_production/encode_card_art.mjs`。
+- 重制正面系列：以 `_artifacts/card-art/imagegen-series-log.md` 中的五张用户
+  认可参考与共享提示合同逐张生成，复制到 `originals/` 后运行
+  `_production/encode_card_art.mjs`；用 `_qa/build-card-contact-sheet.mjs`
+  先检查整套一致性，再进入游戏内 QA。
 - 修改页面顺序或抽牌规则：`OracleProtocol.tsx` 的阶段处理函数。
 - 改白话解读与今日行动：`data/plain-readings.ts`。
 - 改经典牌义、反思问题或新增牌：`data/cards.ts`，并在 `public/card-art/` 添加图片。

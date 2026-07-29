@@ -487,8 +487,8 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 276px;
-    height: 276px;
+    width: 246px;
+    height: 246px;
     border: 1px solid rgba(101, 199, 192, .13);
     border-radius: 50%;
     transform: translate(-50%, -50%);
@@ -513,7 +513,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 82px;
+    width: 94px;
     aspect-ratio: 2/3;
     padding: 0;
     border: 0;
@@ -576,11 +576,13 @@
 }
 
 .op-hero-card {
+  --focus-start-scale: .36;
+  --focus-pull-scale: .39;
   position: absolute;
   z-index: 40;
   top: 50%;
   left: 50%;
-  width: min(58vw, 228px);
+  width: min(66vw, 258px);
   aspect-ratio: 2/3;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 24px 38px rgba(0,0,0,.6));
@@ -614,7 +616,7 @@
   &__card {
     position: relative;
     z-index: 10;
-    width: min(56vw, 222px);
+    width: min(64vw, 250px);
     aspect-ratio: 2/3;
     animation: op-card-reveal 560ms cubic-bezier(.2,.72,.2,1) both;
   }
@@ -980,20 +982,24 @@
     &__stage { inset: 104px 0 18px; }
   }
 
-  .op-orbit__track { width: 218px; height: 218px; }
-  .op-orbit__card { width: 70px; }
+  .op-orbit__track { width: 188px; height: 188px; }
+  .op-orbit__card { width: 82px; }
 
   .op-focus {
     &__stage { inset: 82px 0 146px; }
     &__copy { bottom: 128px; h1 { font-size: 17px; } }
   }
 
-  .op-hero-card { width: min(47vw, 158px); }
+  .op-hero-card {
+    --focus-start-scale: .44;
+    --focus-pull-scale: .47;
+    width: min(58vw, 186px);
+  }
   .op-actions { bottom: 9px; gap: 4px; .op-button { min-height: 44px; } }
 
   .op-single {
     padding-top: 88px;
-    &__card { width: min(44vw, 150px); }
+    &__card { width: min(58vw, 186px); }
     &__reveal-copy { margin-top: 9px; h1 { margin: 4px 0 8px; font-size: 21px; } }
     &__meaning {
       margin-top: 8px;
@@ -1104,7 +1110,7 @@
       translate(-50%, -50%)
       translate(var(--focus-from-x), var(--focus-from-y))
       rotate(var(--focus-from-rotation))
-      scale(.36);
+      scale(var(--focus-start-scale));
   }
   18% {
     opacity: 1;
@@ -1112,7 +1118,7 @@
       translate(-50%, -50%)
       translate(var(--focus-pull-x), var(--focus-pull-y))
       rotate(var(--focus-from-rotation))
-      scale(.39);
+      scale(var(--focus-pull-scale));
   }
   58% {
     opacity: 1;
