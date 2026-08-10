@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import {
   callAigramAPI,
-  isInAigram,
-  telegramId,
+  isInAigramNow,
+  getTelegramId,
   type AigramResponse,
 } from '@shared/runtime'
 
@@ -25,14 +25,14 @@ export function usePlayerName() {
       setName(override)
       return
     }
-    if (!isInAigram || !telegramId) {
+    if (!isInAigramNow() || !getTelegramId()!) {
       setName('AlterU')
       return
     }
 
     let active = true
     void callAigramAPI<AigramResponse<PlatformProfile>>(
-      `/note/telegram/user/get/info/by/telegram_id?telegram_id=${encodeURIComponent(telegramId)}`,
+      `/note/telegram/user/get/info/by/telegram_id?telegram_id=${encodeURIComponent(getTelegramId()!)}`,
       'GET',
     ).then((response) => {
       if (!active) return
