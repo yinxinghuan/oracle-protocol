@@ -44,7 +44,7 @@ const copy = {
 export type CopyKey = keyof typeof copy
 
 function detectLocale(): Locale {
-  const override = localStorage.getItem('game_locale')
+  const override = alteruLocalStorage.getItem('game_locale')
   if (override === 'zh' || override === 'en') return override
   return navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'
 }
@@ -53,7 +53,7 @@ export function useI18n() {
   const [locale, setLocaleState] = useState<Locale>(detectLocale)
 
   const setLocale = useCallback((next: Locale) => {
-    localStorage.setItem('game_locale', next)
+    alteruLocalStorage.setItem('game_locale', next)
     setLocaleState(next)
   }, [])
 
