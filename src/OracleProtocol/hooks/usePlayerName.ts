@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
   callAigramAPI,
-  isInAigramNow,
-  getTelegramId,
   type AigramResponse,
 } from '@shared/runtime'
+import { waitForAigramIdentity } from '@shared/runtime/identity-ready'
 
 interface PlatformProfile {
   name?: string
@@ -25,22 +24,27 @@ export function usePlayerName() {
       setName(override)
       return
     }
-    if (!isInAigramNow() || !getTelegramId()!) {
-      setName('AlterU')
-      return
-    }
-
     let active = true
-    void callAigramAPI<AigramResponse<PlatformProfile>>(
-      `/note/telegram/user/get/info/by/telegram_id?telegram_id=${encodeURIComponent(getTelegramId()!)}`,
-      'GET',
-    ).then((response) => {
+    void (async () => {
+      const telegramId = await waitForAigramIdentity()
       if (!active) return
-      const next = response?.data?.name || response?.data?.user_name
-      setName(next?.trim() ? next.trim().slice(0, 48) : 'AlterU')
-    }).catch(() => {
-      if (active) setName('AlterU')
-    })
+      if (!telegramId) {
+        setName('AlterU')
+        return
+      }
+
+      try {
+        const response = await callAigramAPI<AigramResponse<PlatformProfile>>(
+          `/note/telegram/user/get/info/by/telegram_id?telegram_id=${encodeURIComponent(telegramId)}`,
+          'GET',
+        )
+        if (!active) return
+        const next = response?.data?.name || response?.data?.user_name
+        setName(next?.trim() ? next.trim().slice(0, 48) : 'AlterU')
+      } catch {
+        if (active) setName('AlterU')
+      }
+    })()
 
     return () => {
       active = false
